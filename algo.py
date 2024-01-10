@@ -103,7 +103,7 @@ while True:
 
     if len(names) == 0:
         break
-
+#make it a chain!
 available_targets = list(players.keys())
 for id in players:
     random_key = random.choice(available_targets)
