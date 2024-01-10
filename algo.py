@@ -105,26 +105,27 @@ while True:
         break
 #make it a chain!
 available_targets = list(players.keys())
-for id in players:
-    random_key = random.choice(available_targets)
 
-    while True:
-        if random_key == id:
-            random_key = random.choice(available_targets)
-        
-        else:
-            available_targets.remove(random_key)
-            break
+random.shuffle(available_targets)
 
-    players[id].set_target(players[random_key])
+for idx, player_id in enumerate(available_targets):
+    if player_id != available_targets[-1]:
+        players[player_id].set_target(players[available_targets[idx + 1]])
+        print(f"{players[player_id].name} is hunting {players[available_targets[idx + 1]].name}")
+        continue
 
+    players[player_id].set_target(players[available_targets[0]])
+    print(f"{players[player_id].name} is hunting {players[available_targets[0]].name}")
+    print("Everything done")
+    
 
+"""
 print(f"The name of the player at id 5 is {players[5].name}")
 print(f"Their target is {players[5].target.name}, their id is: {players[5].target.id}")
 print("Now we are going to kill that target")
 players[players[5].target.id].get_killed()
 players[5].kill_target()
 print(f"Now the kill count is {players[5].kills} and their new target is {players[5].target.name}")
-
+"""
     
 
