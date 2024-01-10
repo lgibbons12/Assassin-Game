@@ -29,7 +29,7 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-SITE_ID = 3
+SITE_ID = 4
 
 INSTALLED_APPS = [
     "users",
@@ -55,7 +55,7 @@ SOCIALACCOUNT_PROVIDERS = {
         "AUTH_PARAMS": {"access_type": "online"}
     }
 }
-
+AUTH_USER_MODEL = "users.CustomUser"
 MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     "django.middleware.security.SecurityMiddleware",

@@ -6,6 +6,10 @@ from django.contrib.auth import logout
 def home(request):
     return render(request, "users/home.html")
 
+#view that shows the assignemtn
+def assignment(request):
+    return render(request, "users/assignment.html")
+
 def logout_view(request):
     logout(request)
     return redirect("/")
