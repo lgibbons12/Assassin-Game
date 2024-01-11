@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth import get_user_model
 # Create your models here.
 class CustomUser(AbstractUser):
     @property
@@ -12,7 +15,7 @@ class Player(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     is_dead = models.BooleanField(default=False)
     target_name = models.CharField(max_length=255, blank=True, null=True)
-    target_pk = models.IntegerField(default = None)
+    target_pk = models.IntegerField(null=True, blank=True)
     kills = models.IntegerField(default=0)
     is_playing = models.BooleanField(default=True)
     def set_target(self, target):
@@ -30,6 +33,11 @@ class Player(models.Model):
 
     def kill_target(self):
         pass
+
+    @receiver(post_save, sender=CustomUser)
+    def create_player(sender, instance, created, **kwargs):
+        if created:
+            Player.objects.create(user=instance)
 
 class Checker(models.Model):
     target = models.ForeignKey('Player', related_name='target_checker', on_delete=models.CASCADE)

@@ -4,7 +4,8 @@ import random
 from .models import Player
 
 class GameManager:
-    TARGETS_JSON_PATH = 'static/users/targets.json'  # Adjust the path accordingly
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    TARGETS_JSON_PATH = os.path.join(BASE_DIR, 'static', 'users', 'targets.json')
 
     @staticmethod
     def new_target(player, target_killed):
