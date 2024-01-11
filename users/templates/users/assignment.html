@@ -11,7 +11,7 @@
         {% if user.is_authenticated %}
         <h2>Welcome {{user.first_name}} {{user.last_name}}!</h2>
 
-        <p>Your target is: {{user.target_name}}</p>
+        <p>Your target is: {{user.player.target_name}}</p>
 
         <button>I died/Was Found Out</button>
         <button>I killed my target</button>

@@ -6,17 +6,18 @@ class CustomUser(AbstractUser):
     def name(self):
         return f"{self.first_name} {self.last_name}"
 
-class Target_List(models.Model):
-    target_list = models.ArrayField(models.IntegerField())
+
     
 class Player(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     is_dead = models.BooleanField(default=False)
     target_name = models.CharField(max_length=255, blank=True, null=True)
+    target_pk = models.IntegerField(default = None)
     kills = models.IntegerField(default=0)
     is_playing = models.BooleanField(default=True)
     def set_target(self, target):
         self.target_name = target.user.name
+        self.target_pk = target.pk
         self.save()
 
     def get_killed(self):
