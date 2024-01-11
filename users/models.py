@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
+
 # Create your models here.
 class CustomUser(AbstractUser):
     @property
@@ -24,15 +25,23 @@ class Player(models.Model):
         self.save()
 
     def get_killed(self):
-        self.is_dead = True
-        self.save()
+        checker_instance, created = Checker.objects.get_or_create(target=self)
+
+        checker_instance.target_confirm()
+        checker_instance.save()
 
     def new_target(self):
         # Implement logic to randomly choose a new target
         pass
 
     def kill_target(self):
-        pass
+        targeting = Player.objects.get(pk = self.target_pk)
+        checker_instance, created = Checker.objects.get_or_create(target=targeting)
+
+        checker_instance.killer = self
+
+        checker_instance.killer_confirm()
+        checker_instance.save()
 
     @receiver(post_save, sender=CustomUser)
     def create_player(sender, instance, created, **kwargs):
@@ -45,22 +54,33 @@ class Checker(models.Model):
     confirmations = models.IntegerField(default=0)
     target_confirmed = models.BooleanField(default=False)
     killer_confirmed = models.BooleanField(default=False)
+    shown_to_target = models.BooleanField(default=False)
+    shown_to_killer = models.BooleanField(default = False)
 
+
+    def deletion(self):
+        if self.shown_to_killer and self.shown_to_target:
+            self.delete()
     def target_confirm(self):
         if not self.target_confirmed:
             self.confirmations += 1
             self.target_confirmed = True
-            self.checking()
+            #self.checking()
 
     def killer_confirm(self):
         if not self.killer_confirmed:
             self.confirmations += 1
             self.killer_confirmed = True
-            self.checking()
+            #self.checking()
 
     def checking(self):
+        from .game import GameManager
         if self.confirmations == 2:
             # Do something when both target and killer are confirmed
-            self.target.user.is_dead = True
-            self.kill()
+            self.target.is_dead = True
+            gm = GameManager()
+            gm.new_target(self.killer, self.target)
+
+            return True
+        return False
     

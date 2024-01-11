@@ -9,6 +9,7 @@ class GameManager:
 
     @staticmethod
     def new_target(player, target_killed):
+        
         # Retrieve the existing target list
         target_list = GameManager._load_targets()
 

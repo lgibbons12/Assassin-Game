@@ -9,14 +9,20 @@
     <body>
         
         {% if user.is_authenticated %}
+        {% if state == 0 %}
         <h2>Welcome {{user.first_name}} {{user.last_name}}!</h2>
 
         <p>Your target is: {{user.player.target_name}}</p>
 
         <button>I died/Was Found Out</button>
         <button>I killed my target</button>
-        
+        {% elif state == 1 %}
+        <p>You killed your target!</p>
+        <p>Reload page to see your new target</p>
 
+        {% elif state == 2 %}
+        <p>Sorry you died, wait till next game!</p>
+        {% endif %}
         {% else %}
         <p>Sorry you are not authenticated to see this page</p>
         {% endif %}
