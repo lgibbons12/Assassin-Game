@@ -14,11 +14,9 @@ class PlayerAdmin(admin.ModelAdmin):
         for player in queryset:
             target = Player.objects.get(pk=player.target_pk)
             print(f"{player.user.name} is going to kill their target {target.user.name}")
-            print(f"The target's target is {target.target_name}, so it should be the players afer")
+            print(f"The target's target is {target.target_name}, so it should be the players after")
             target.get_killed()
             player.kill_target()
-
-        
 
     def user_name(self, obj):
         return obj.user.name
@@ -27,10 +25,24 @@ class PlayerAdmin(admin.ModelAdmin):
 
 class CheckerAdmin(admin.ModelAdmin):
     actions = ['checking']
+    list_display = ['target_user', 'killer_user', 'confirmations', 'target_confirmed', 'killer_confirmed', 'shown_to_target', 'shown_to_killer']
+
+    def target_user(self, obj):
+        return obj.target.user.name
+
+    def killer_user(self, obj):
+        return obj.killer.user.name if obj.killer else None
+
+    target_user.short_description = 'Target User'
+    killer_user.short_description = 'Killer User'
+
     def checking(self, request, queryset):
         for obj in queryset:
             obj.checking()
 
-admin.site.register(CustomUser)
+class CustomUserAdmin(admin.ModelAdmin):
+    list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active']
+
+admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Player, PlayerAdmin)
 admin.site.register(Checker, CheckerAdmin)

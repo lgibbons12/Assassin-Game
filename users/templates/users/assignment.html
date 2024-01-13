@@ -1,34 +1,36 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Django Google Sign In</title>
-    </head>
-    <body>
-        
+        <title>Your Assignment</title>
+    <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
+</head>
+<body>
+
+    <div class="container">
         {% if user.is_authenticated %}
-        {% if state == 0 %}
-        <h2>Welcome {{user.first_name}} {{user.last_name}}!</h2>
-
-        <p>Your target is: {{user.player.target_name}}</p>
-
-        <button class="decision" data-param="died">I was killed</button>
-        <button class="decision" data-param="killed">I killed my target</button>
-        {% elif state == 1 %}
-        <p>You killed your target!</p>
-        <p>Reload page to see your new target</p>
-
-        {% elif state == 2 %}
-        <p>Sorry you died, wait till next game!</p>
-
-        {% elif state == 3 %}
-        <p>You won!!!!</p>
-        {% endif %}
+            <div class="content">
+                {% if state == 0 %}
+                    <h2>Welcome, {{ user.first_name }} {{ user.last_name }}!</h2>
+                    <p>Your target is: {{ user.player.target_name }}</p>
+                    <button class="decision" data-param="died">I was killed</button>
+                    <button class="decision" data-param="killed">I killed my target</button>
+                {% elif state == 1 %}
+                    <p>You killed your target!</p>
+                    <p>Reload page to see your new target</p>
+                {% elif state == 2 %}
+                    <p>Sorry you died, wait till the next game!</p>
+                {% elif state == 3 %}
+                    <p>You won!!!!</p>
+                {% endif %}
+            </div>
         {% else %}
-        <p>Sorry you are not authenticated to see this page</p>
+            <p>Sorry, you are not authenticated to see this page</p>
         {% endif %}
+    </div>
 
 
 

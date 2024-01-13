@@ -1,0 +1,121 @@
+body {
+    background-color: black;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    background-color: #FF4545; /* Red color */
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.login a:hover {
+    background-color: #D52B2B; /* Darker red on hover */
+}
+
+.user-info {
+    text-align: center;
+}
+
+.links a {
+    color: white;
+    text-decoration: none;
+    margin: 0 10px;
+    padding: 5px 10px;
+    border: 1px solid #FF4545; /* Red border */
+    border-radius: 5px;
+    transition: color 0.3s, border-color 0.3s;
+}
+
+.links a:hover {
+    color: #FF4545; /* Red color on hover */
+    border-color: #D52B2B; /* Darker red border on hover */
+}
+
+
+
+body {
+    background-color: black;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+}
+
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.content {
+    border: 2px solid red;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    background-color: #1f1f1f;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+button {
+    background-color: red;
+    color: white;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: darkred;
+}
+
+a {
+    color: red;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: darkred;
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+
+@media only screen and (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
+    .content {
+        padding: 15px;
+    }
+
+    button {
+        padding: 8px 15px;
+    }
+}

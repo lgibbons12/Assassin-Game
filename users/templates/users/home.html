@@ -1,20 +1,34 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Django Google Sign In</title>
+        <title>Assassin</title>
+        <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
     </head>
-    <body>
+    
+<body>
+    <div class="container">
         {% load socialaccount %}
-        <h2>Google Login</h2>
-        <a href="{% provider_login_url 'google' %}?next=/">Login with Google</a>
+        <div class="header">
+            <h2>Google Login</h2>
+        </div>
+        <div class="login">
+            <a href="{% provider_login_url 'google' %}?next=/">Login with Google</a>
+        </div>
 
         {% if user.is_authenticated %}
-        <p>You are signed in as {{user.first_name}}</p>
-        <a href="assignment">See Your Assigment</a>
-        <a href="logout">Logout</a>
+        <div class="user-info">
+            <p>You are signed in as {{user.first_name}}</p>
+            <div class="links">
+                <a href="assignment">See Your Assignment</a>
+                <a href="logout">Logout</a>
+            </div>
+        </div>
         {% endif %}
-    </body>
+    </div>
+</body>
+
 </html>
