@@ -1,14 +1,31 @@
 import json
 import os
 import random
-from .models import Player
+from .models import Player, Checker
 
 class GameManager:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     TARGETS_JSON_PATH = os.path.join(BASE_DIR, 'static', 'users', 'targets.json')
 
     @staticmethod
+    def win_condition():
+        living_players = Player.objects.filter(is_dead=False, is_playing=True)
+
+        if living_players.count() == 1:
+            winner = living_players.get()
+            winner.is_winner = True
+            winner.save()
+            return True
+        
+        return False
+            
+         
+    @staticmethod
     def new_target(player, target_killed):
+        print("i was called")
+        if GameManager.win_condition():
+            return
+        
         
         # Retrieve the existing target list
         target_list = GameManager._load_targets()
@@ -22,6 +39,7 @@ class GameManager:
             except IndexError:
                 next_target_player = Player.objects.get(pk=target_list[0])
             player.set_target(next_target_player)
+            player.save()
             del target_list[index_to_delete]
 
             # Save the updated target list to the JSON file
@@ -29,6 +47,20 @@ class GameManager:
 
     @staticmethod
     def assign_targets():
+        Checker.objects.all().delete()
+        for player_instance in Player.objects.all():
+            # Set each field to its default value
+            player_instance.is_dead = False
+            player_instance.target_name = ''
+            player_instance.target_pk = None
+            player_instance.kills = 0
+            player_instance.is_playing = True
+            player_instance.is_winner = False
+
+            # Save the changes
+            player_instance.save()
+        
+
         available_targets = list(Player.objects.filter(is_playing=True, is_dead=False).values_list('id', flat=True))
         random.shuffle(available_targets)
 

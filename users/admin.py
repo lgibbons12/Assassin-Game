@@ -25,8 +25,12 @@ class PlayerAdmin(admin.ModelAdmin):
 
     user_name.short_description = 'User Name'
 
-
+class CheckerAdmin(admin.ModelAdmin):
+    actions = ['checking']
+    def checking(self, request, queryset):
+        for obj in queryset:
+            obj.checking()
 
 admin.site.register(CustomUser)
 admin.site.register(Player, PlayerAdmin)
-admin.site.register(Checker)
+admin.site.register(Checker, CheckerAdmin)
