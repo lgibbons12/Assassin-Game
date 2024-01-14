@@ -25,7 +25,7 @@ def assignment(request):
         setattr(checker, result_attr, True)
         setattr(checker, shown_attr, True)
         checker.save()
-        checker.deletion()
+        #checker.deletion()
         return result
 
     # Call checking() for each target instance and store the result

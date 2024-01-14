@@ -54,7 +54,7 @@ class GameManager:
             player_instance.target_name = ''
             player_instance.target_pk = None
             player_instance.kills = 0
-            player_instance.is_playing = True
+            
             player_instance.is_winner = False
 
             # Save the changes
