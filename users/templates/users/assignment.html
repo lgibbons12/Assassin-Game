@@ -16,8 +16,10 @@
                 {% if state == 0 %}
                     <h2>Welcome, {{ user.first_name }} {{ user.last_name }}!</h2>
                     <p>Your target is: {{ user.player.target_name }}</p>
-                    <button class="decision" data-param="died">I was killed</button>
-                    <button class="decision" data-param="killed">I killed my target</button>
+                    <button class="decision" data-param="died" style="background-color: red;">I Was Eliminated</button>
+                    <button class="decision" data-param="killed" style="background-color: green;">Target Eliminated</button>
+                    <button class="decision" data-param="discovered" style="background-color: blue;">I Was Discovered</button>
+
                     <h2 id="notification"></h2>
                 {% elif state == 1 %}
                     <p>You killed your target!</p>

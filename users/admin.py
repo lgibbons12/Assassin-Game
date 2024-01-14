@@ -4,7 +4,7 @@ from .game import GameManager
 
 class PlayerAdmin(admin.ModelAdmin):
     actions = ['kill_player', 'assign_targets']
-    list_display = ['user_name', 'is_dead', 'target_name', 'kills', 'is_playing']
+    list_display = ['user_name', 'is_dead', 'target_name', 'kills', 'is_playing', 'in_waiting']
 
     def assign_targets(self, request, queryset):
         gm = GameManager()

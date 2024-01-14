@@ -20,11 +20,15 @@ class Player(models.Model):
     kills = models.IntegerField(default=0)
     is_playing = models.BooleanField(default=True)
     is_winner = models.BooleanField(default=False)
+    in_waiting = models.BooleanField(default=False)
     def set_target(self, target):
         self.target_name = target.user.name
         self.target_pk = target.pk
         self.save()
 
+    def discovered(self):
+        self.is_dead = True
+        self.save()
     def get_killed(self):
         checker_instance, created = Checker.objects.get_or_create(target=self)
 
@@ -32,7 +36,7 @@ class Player(models.Model):
         checker_instance.save()
 
     
-    
+
 
     def kill_target(self):
         targeting = Player.objects.get(pk = self.target_pk)

@@ -12,6 +12,10 @@ def home(request):
 
 #view that shows the assignemtn
 def assignment(request):
+    target = Player.objects.get(pk=request.user.player.target_pk)
+    if target.is_dead:
+        GameManager().new_target(request.user.player, target)
+    
     user_pk = request.user.pk
     state = -1
 
@@ -42,11 +46,13 @@ def assignment(request):
         if request.user.player.is_winner:
             state = 3
     else:
-        if any(target_checking_results):
+        if any(target_checking_results) or request.user.player.is_dead:
             state = 2
         elif any(killer_checking_results):
             state = 1
         else:
+            if request.user.player.in_waiting:
+                return redirect(f'/?param=waiting')
             state = 0
 
     context = {'state': state}
@@ -71,8 +77,14 @@ def handling(request):
         elif param == "killed":
             user.player.kill_target()
         
+        elif param == "discovered":
+            user.player.discovered()
+        
         else:
             raise ValueError("wrong param")
+        
+        user.player.in_waiting = True
+        user.player.save()
         
         return HttpResponse('POST request processed succussfully')
     else:

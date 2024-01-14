@@ -41,6 +41,7 @@ class GameManager:
             except IndexError:
                 next_target_player = Player.objects.get(pk=target_list[0])
             player.set_target(next_target_player)
+            player.in_waiting = False
             player.save()
             del target_list[index_to_delete]
 
@@ -56,6 +57,7 @@ class GameManager:
             player_instance.target_name = ''
             player_instance.target_pk = None
             player_instance.kills = 0
+            player_instance.in_waiting = False
             
             player_instance.is_winner = False
 
