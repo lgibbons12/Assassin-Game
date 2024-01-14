@@ -6,7 +6,9 @@ import json
 from django.http import HttpResponse, JsonResponse
 # Create your views here.
 def home(request):
-    return render(request, "users/home.html")
+    param_value = request.GET.get('param')
+    context = {'param': param_value}
+    return render(request, "users/home.html", context)
 
 #view that shows the assignemtn
 def assignment(request):

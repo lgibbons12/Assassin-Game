@@ -18,6 +18,7 @@
                     <p>Your target is: {{ user.player.target_name }}</p>
                     <button class="decision" data-param="died">I was killed</button>
                     <button class="decision" data-param="killed">I killed my target</button>
+                    <h2 id="notification"></h2>
                 {% elif state == 1 %}
                     <p>You killed your target!</p>
                     <p>Reload page to see your new target</p>
@@ -56,6 +57,11 @@
                 button.addEventListener('click', function() {
                     // Extract the 'data-param' attribute value
                     var param = this.getAttribute('data-param');
+                    var notification = document.getElementById('notification');
+
+                    document.querySelectorAll('.decision').forEach(function(btn) {
+                        btn.disabled = true;
+                    })
                     
                     /*
                     var container = document.querySelector('.container');
@@ -97,7 +103,7 @@
                             // Handle the response from the server if needed
                             
                             setTimeout(function() {
-                                    window.location.href = '{% url "users:assignment" %}';
+                                    window.location.href = '{% url "users:home" %}?param=' + param;
                                 }, 2000); // 2000 milliseconds = 2 seconds (duration of the animation)
                             }
                         }

@@ -33,6 +33,8 @@ class GameManager:
         if target_list:
             # Remove the target_killed from the list
             pk_to_remove = target_killed.pk
+            if not pk_to_remove in target_list:
+                return
             index_to_delete = target_list.index(pk_to_remove)
             try:
                 next_target_player = Player.objects.get(pk=target_list[index_to_delete + 1])

@@ -1,14 +1,13 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Assassin</title>
-        <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
-    </head>
-    
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assassin</title>
+    <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
+</head>
 <body>
     <div class="container">
         {% load socialaccount %}
@@ -29,6 +28,20 @@
         </div>
         {% endif %}
     </div>
-</body>
 
+    <script>
+        // Check if the 'param' variable is present in the URL
+        var urlParams = new URLSearchParams(window.location.search);
+        var paramValue = urlParams.get('param');
+
+        if (paramValue) {
+            // Display an alert based on the 'param' value
+            if (paramValue === 'died') {
+                alert('Waiting for your killer to confirm!');
+            } else if (paramValue === 'killed') {
+                alert('Waiting for your target to confirm!');
+            }
+        }
+    </script>
+</body>
 </html>
