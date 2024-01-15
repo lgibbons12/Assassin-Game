@@ -26,6 +26,17 @@
                 <a href="logout">Logout</a>
             </div>
         </div>
+
+        <div class="statistics">
+            <h3>Game Statistics</h3>
+            <p><u>Players Alive</u>: {{ players_alive }}</p>
+            <p><u>Top 5 Kill Leaders:</u></p>
+            <ul>
+                {% for player in kill_leaders %}
+                    <li><strong>{{ player.user.name }}</strong>: {{ player.kills }} kills</li>
+                {% endfor %}
+            </ul>
+        </div>
         {% endif %}
     </div>
 
@@ -45,5 +56,7 @@
             }
         }
     </script>
+
+    
 </body>
 </html>

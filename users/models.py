@@ -86,7 +86,12 @@ class Checker(models.Model):
             if gm.win_condition():
                 return False
             self.target.is_dead = True
+            self.target.in_waiting = False
             self.target.save()
+
+            self.killer.kills += 1
+            self.killer.in_waiting = False
+            self.killer.save()
             
             gm.new_target(self.killer, self.target)
 

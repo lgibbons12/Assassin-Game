@@ -37,9 +37,8 @@
 
 
 
-        <script>
-   
-            function getCookie(name) {
+    <script>
+        function getCookie(name) {
             var cookieValue = null;
             if (document.cookie && document.cookie !== '') {
                 var cookies = document.cookie.split(';');
@@ -54,68 +53,60 @@
             }
             return cookieValue;
         }
-            // Attach a click event listener to all buttons with the class 'run_code_button'
-            document.querySelectorAll('.decision').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    // Extract the 'data-param' attribute value
-                    var param = this.getAttribute('data-param');
-                    var notification = document.getElementById('notification');
+    
+        // Attach a click event listener to all buttons with the class 'decision'
+        document.querySelectorAll('.decision').forEach(function (button) {
+            button.addEventListener('click', function () {
+                // Extract the 'data-param' attribute value
+                var param = this.getAttribute('data-param');
+                var notification = document.getElementById('notification');
+                var actionMessage;
 
-                    document.querySelectorAll('.decision').forEach(function(btn) {
+// Determine the nature of the action for the confirmation message
+if (param === 'died') {
+    actionMessage = 'Are you sure you want to confirm that you were eliminated?';
+} else if (param === 'killed') {
+    actionMessage = 'Are you sure you want to confirm that you eliminated your target?';
+} else if (param === 'discovered') {
+    actionMessage = 'Are you sure you want to confirm that you were discovered?';
+} else {
+    actionMessage = 'Are you sure you want to proceed with this action?';
+}
+
+// Display confirmation dialog
+var confirmAction = confirm(actionMessage);
+                
+                if (confirmAction) {
+                    // Disable all decision buttons
+                    document.querySelectorAll('.decision').forEach(function (btn) {
                         btn.disabled = true;
                     })
-                    
-                    /*
-                    var container = document.querySelector('.container');
-                    var checkMarkContainer = container.querySelector('.check-mark-container');
-                    var xMarkContainer = container.querySelector(".x-mark-container");
-                    var stuff = container.querySelector(".stuff");
-        
-                    if (param === "approved") {
-                        container.classList.add('animate-approval');
-                        checkMarkContainer.style.display = 'block';
-                        stuff.style.display = 'none';
-                        checkMarkContainer.style.display = 'block';
-                        
-                        
-                    }
-        
-                    else if (param === "denied") {
-                        console.log("logging that it is denied");
-                        container.classList.add('animate-approval');
-                        xMarkContainer.style.display = 'block';
-                        stuff.style.display = 'none';
-                        xMarkContainer.style.display = 'block';
-                        
-                    }
-                    */
-        
+    
                     // Use AJAX to send a request to a Django view with the parameter
                     var xhr = new XMLHttpRequest();
                     xhr.open('POST', '{% url "users:handling" %}', true);
-        
+    
                     // Set up the request headers if needed
                     xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
                     xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8'); // Add this line
-        
+    
                     // Define what happens on successful data submission
                     xhr.onload = function () {
                         if (xhr.status == 200) {
                             console.log(xhr.responseText);
                             // Handle the response from the server if needed
-                            
-                            setTimeout(function() {
-                                    window.location.href = '{% url "users:home" %}?param=' + param;
-                                }, 2000); // 2000 milliseconds = 2 seconds (duration of the animation)
-                            }
+    
+                            setTimeout(function () {
+                                window.location.href = '{% url "users:home" %}?param=' + param;
+                            }, 2000); // 2000 milliseconds = 2 seconds (duration of the animation)
                         }
-                   
-        
+                    }
+    
                     // Send the request with the parameter
-                    xhr.send(JSON.stringify({'param': param,}));
-                });
+                    xhr.send(JSON.stringify({ 'param': param, }));
+                }
             });
-        </script>
-            
+        });
+    </script>
     </body>
 </html>

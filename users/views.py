@@ -1,13 +1,15 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout
 from .game import GameManager
+from .stats import StatManager
 from .models import Checker, Player
 import json
 from django.http import HttpResponse, JsonResponse
 # Create your views here.
 def home(request):
     param_value = request.GET.get('param')
-    context = {'param': param_value}
+    context = {'param': param_value, 'kill_leaders': StatManager().get_kill_rankings(),
+               'players_alive': StatManager().get_alive_players_count()}
     return render(request, "users/home.html", context)
 
 #view that shows the assignemtn
@@ -63,6 +65,9 @@ def logout_view(request):
     return redirect("/")
 
 
+def submit_complaint(request):
+    return render(request, "users/complaint.html")
+
 def handling(request):
     #make it users.player
     if request.method == 'POST':
@@ -84,6 +89,7 @@ def handling(request):
             raise ValueError("wrong param")
         
         user.player.in_waiting = True
+        print(f"{user.name} is in waiting anymore")
         user.player.save()
         
         return HttpResponse('POST request processed succussfully')

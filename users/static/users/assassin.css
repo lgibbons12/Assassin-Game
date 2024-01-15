@@ -119,3 +119,37 @@ a:hover {
         padding: 8px 15px;
     }
 }
+
+.statistics {
+    border: 2px solid #FF4545; /* Red border */
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    background-color: #1f1f1f;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.statistics h3 {
+    color: #FF4545; /* Red color for heading */
+}
+
+.statistics ul {
+    list-style: none;
+    padding: 0;
+}
+
+.statistics li {
+    margin-bottom: 10px;
+}
+
+.statistics li span {
+    color: darkred; /* Darker red color for specific elements */
+}
+
+/* Adjust styles for responsiveness */
+@media only screen and (max-width: 600px) {
+    .statistics {
+        padding: 15px;
+    }
+}
