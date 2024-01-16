@@ -28,7 +28,9 @@
 
         <div class="statistics">
             <h3>Game Statistics</h3>
-            
+            {% if winner is not None %}
+            <h4><strong>Winner:</strong>{{ winner.user.name }}</h4>
+            {% endif %}
             <p><u>Players Alive</u>: {{ players_alive }}</p>
             <p><u>Top 5 Kill Leaders:</u></p>
             <ul>
@@ -60,7 +62,10 @@
                 alert('Waiting for your target to confirm!');
             } else if (paramValue === "waiting") {
                 alert("Still waiting for confirmation");
+            } else if (paramValue === "noassignment") {
+                alert("Waiting for game to start");
             }
+
         }
     </script>
 

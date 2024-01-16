@@ -8,14 +8,21 @@ from django.http import HttpResponse, JsonResponse
 # Create your views here.
 def home(request):
     param_value = request.GET.get('param')
+    winners = StatManager.get_winner()
+    print(winners)
+    
+    print(winners)
     context = {'param': param_value, 'kill_leaders': StatManager().get_kill_rankings(),
-               'players_alive': StatManager().get_alive_players_count()}
+               'players_alive': StatManager().get_alive_players_count(), 'winner': winners}
     return render(request, "users/home.html", context)
 
 
 #view that shows the assignemtn
 def assignment(request):
-    target = Player.objects.get(pk=request.user.player.target_pk)
+    try:
+        target = Player.objects.get(pk=request.user.player.target_pk)
+    except Player.DoesNotExist:
+        return redirect("/?param=noassignment")
     if target.is_dead:
         GameManager().new_target(request.user.player, target)
     
