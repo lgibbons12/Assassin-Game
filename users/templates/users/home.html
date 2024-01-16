@@ -1,20 +1,63 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Django Google Sign In</title>
-    </head>
-    <body>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assassin</title>
+    <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
+</head>
+<body>
+    <div class="container">
         {% load socialaccount %}
-        <h2>Google Login</h2>
-        <a href="{% provider_login_url 'google' %}?next=/">Login with Google</a>
+        <div class="header">
+            <h2>Google Login</h2>
+        </div>
+        <div class="login">
+            <a href="{% provider_login_url 'google' %}?next=/">Login with Google</a>
+        </div>
 
         {% if user.is_authenticated %}
-        <p>You are signed in as {{user.first_name}}</p>
-        <a href="assignment">See Your Assigment</a>
-        <a href="logout">Logout</a>
+        <div class="user-info">
+            <p>You are signed in as {{user.first_name}}</p>
+            <div class="links">
+                <a href="assignment">See Your Assignment</a>
+                <a href="complaints">Submit a Complaint</a>
+                <a href="logout">Logout</a>
+            </div>
+        </div>
+
+        <div class="statistics">
+            <h3>Game Statistics</h3>
+            <p><u>Players Alive</u>: {{ players_alive }}</p>
+            <p><u>Top 5 Kill Leaders:</u></p>
+            <ul>
+                {% for player in kill_leaders %}
+                    <li><strong>{{ player.user.name }}</strong>: {{ player.kills }} kills</li>
+                {% endfor %}
+            </ul>
+        </div>
         {% endif %}
-    </body>
+    </div>
+
+    <script>
+        // Check if the 'param' variable is present in the URL
+        var urlParams = new URLSearchParams(window.location.search);
+        var paramValue = urlParams.get('param');
+
+        if (paramValue) {
+            // Display an alert based on the 'param' value
+            if (paramValue === 'died') {
+                alert('Waiting for your killer to confirm!');
+            } else if (paramValue === 'killed') {
+                alert('Waiting for your target to confirm!');
+            } else if (paramValue === "waiting") {
+                alert("Still waiting for confirmation");
+            }
+        }
+    </script>
+
+    
+</body>
 </html>

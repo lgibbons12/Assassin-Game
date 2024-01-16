@@ -1,30 +1,112 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Django Google Sign In</title>
-    </head>
-    <body>
-        
+        <title>Your Assignment</title>
+    <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
+</head>
+<body>
+
+    <div class="container">
         {% if user.is_authenticated %}
-        {% if state == 0 %}
-        <h2>Welcome {{user.first_name}} {{user.last_name}}!</h2>
+            <div class="content">
+                {% if state == 0 %}
+                    <h2>Welcome, {{ user.first_name }} {{ user.last_name }}!</h2>
+                    <p>Your target is: {{ user.player.target_name }}</p>
+                    <button class="decision" data-param="died" style="background-color: red;">I Was Eliminated</button>
+                    <button class="decision" data-param="killed" style="background-color: green;">Target Eliminated</button>
+                    <button class="decision" data-param="discovered" style="background-color: blue;">I Was Discovered</button>
 
-        <p>Your target is: {{user.player.target_name}}</p>
-
-        <button>I died/Was Found Out</button>
-        <button>I killed my target</button>
-        {% elif state == 1 %}
-        <p>You killed your target!</p>
-        <p>Reload page to see your new target</p>
-
-        {% elif state == 2 %}
-        <p>Sorry you died, wait till next game!</p>
-        {% endif %}
+                    <h2 id="notification"></h2>
+                {% elif state == 1 %}
+                    <p>You killed your target!</p>
+                    <p>Reload page to see your new target</p>
+                {% elif state == 2 %}
+                    <p>Sorry you died, wait till the next game!</p>
+                {% elif state == 3 %}
+                    <p>You won!!!!</p>
+                {% endif %}
+            </div>
         {% else %}
-        <p>Sorry you are not authenticated to see this page</p>
+            <p>Sorry, you are not authenticated to see this page</p>
         {% endif %}
+    </div>
+
+
+
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // Check if this cookie string begins with the name we want
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    
+        // Attach a click event listener to all buttons with the class 'decision'
+        document.querySelectorAll('.decision').forEach(function (button) {
+            button.addEventListener('click', function () {
+                // Extract the 'data-param' attribute value
+                var param = this.getAttribute('data-param');
+                var notification = document.getElementById('notification');
+                var actionMessage;
+
+// Determine the nature of the action for the confirmation message
+if (param === 'died') {
+    actionMessage = 'Are you sure you want to confirm that you were eliminated?';
+} else if (param === 'killed') {
+    actionMessage = 'Are you sure you want to confirm that you eliminated your target?';
+} else if (param === 'discovered') {
+    actionMessage = 'Are you sure you want to confirm that you were discovered?';
+} else {
+    actionMessage = 'Are you sure you want to proceed with this action?';
+}
+
+// Display confirmation dialog
+var confirmAction = confirm(actionMessage);
+                
+                if (confirmAction) {
+                    // Disable all decision buttons
+                    document.querySelectorAll('.decision').forEach(function (btn) {
+                        btn.disabled = true;
+                    })
+    
+                    // Use AJAX to send a request to a Django view with the parameter
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '{% url "users:handling" %}', true);
+    
+                    // Set up the request headers if needed
+                    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+                    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8'); // Add this line
+    
+                    // Define what happens on successful data submission
+                    xhr.onload = function () {
+                        if (xhr.status == 200) {
+                            console.log(xhr.responseText);
+                            // Handle the response from the server if needed
+    
+                            setTimeout(function () {
+                                window.location.href = '{% url "users:home" %}?param=' + param;
+                            }, 2000); // 2000 milliseconds = 2 seconds (duration of the animation)
+                        }
+                    }
+    
+                    // Send the request with the parameter
+                    xhr.send(JSON.stringify({ 'param': param, }));
+                }
+            });
+        });
+    </script>
     </body>
 </html>
