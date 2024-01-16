@@ -12,6 +12,7 @@ def home(request):
                'players_alive': StatManager().get_alive_players_count()}
     return render(request, "users/home.html", context)
 
+
 #view that shows the assignemtn
 def assignment(request):
     target = Player.objects.get(pk=request.user.player.target_pk)
@@ -67,6 +68,9 @@ def logout_view(request):
 
 def submit_complaint(request):
     return render(request, "users/complaint.html")
+
+def rules(request):
+    return render(request, "users/rules.html")
 
 def handling(request):
     #make it users.player

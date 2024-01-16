@@ -22,14 +22,13 @@
         <div class="user-info">
             <p>You are signed in as {{user.first_name}}</p>
             <div class="links">
-                <a href="assignment">See Your Assignment</a>
-                <a href="complaints">Submit a Complaint</a>
-                <a href="logout">Logout</a>
+                <a href="assignment" class="assignment-button">See Your Assignment</a>
             </div>
         </div>
 
         <div class="statistics">
             <h3>Game Statistics</h3>
+            
             <p><u>Players Alive</u>: {{ players_alive }}</p>
             <p><u>Top 5 Kill Leaders:</u></p>
             <ul>
@@ -39,6 +38,13 @@
             </ul>
         </div>
         {% endif %}
+    </div>
+
+    <div class="navbar">
+        <a href="{% url 'users:home' %}">Home</a>
+        <a href="{% url 'users:rules' %}">Rules</a>
+        <a href="{% url 'users:complaints' %}">Feedback</a>
+        <a href="{% url 'users:logout' %}">Logout</a>
     </div>
 
     <script>
