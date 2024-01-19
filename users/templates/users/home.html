@@ -29,7 +29,7 @@
         <div class="statistics">
             <h3>Game Statistics</h3>
             {% if winner is not None %}
-            <h4><strong>Winner:</strong>{{ winner.user.name }}</h4>
+            <h4><strong>Winner: </strong>{{ winner.user.name }}</h4>
             {% endif %}
             <p><u>Players Alive</u>: {{ players_alive }}</p>
             <p><u>Top 5 Kill Leaders:</u></p>
@@ -38,6 +38,8 @@
                     <li><strong>{{ player.user.name }}</strong>: {{ player.kills }} kills</li>
                 {% endfor %}
             </ul>
+
+            
         </div>
         {% endif %}
     </div>

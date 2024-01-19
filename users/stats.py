@@ -14,4 +14,9 @@ class StatManager:
     
     @staticmethod
     def get_winner():
-        return Player.objects.filter(is_winner=True)[0]
+        try:
+            returnable = Player.objects.filter(is_winner=True)[0]
+        except:
+            returnable = None
+        
+        return returnable
