@@ -63,8 +63,7 @@ class Checker(models.Model):
     confirmations = models.IntegerField(default=0)
     target_confirmed = models.BooleanField(default=False)
     killer_confirmed = models.BooleanField(default=False)
-    shown_to_target = models.BooleanField(default=False)
-    shown_to_killer = models.BooleanField(default = False)
+    action_performed = models.BooleanField(default=False)
 
 
 
@@ -85,7 +84,7 @@ class Checker(models.Model):
 
     def checking(self):
         from .game import GameManager
-        if self.confirmations == 2:
+        if self.confirmations == 2 and self.action_performed == False:
             # Do something when both target and killer are confirmed
             gm = GameManager()
             if gm.win_condition():

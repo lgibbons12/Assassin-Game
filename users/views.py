@@ -29,39 +29,32 @@ def assignment(request):
     user_pk = request.user.pk
     state = -1
 
-    # Check if there are any checkers with the current user as a target
-    target_checkers = Checker.objects.filter(target__user__pk=user_pk, shown_to_target=False)
-
-    # Check if there are any checkers with the current user as a killer
-    killer_checkers = Checker.objects.filter(killer__user__pk=user_pk, shown_to_killer=False)
+    #get all unconfirmed checkers
+    target_checkers = Checker.objects.filter(confirmations=2, action_performed=False)
 
     # Function to handle checker logic
-    def handle_checker(checker, result_attr, shown_attr):
+    def handle_checker(checker):
         result = checker.checking()
-        setattr(checker, result_attr, True)
-        setattr(checker, shown_attr, True)
+        checker.action_performed = True
         checker.save()
         #checker.deletion()
         return result
 
-    # Call checking() for each target instance and store the result
-    target_checking_results = [handle_checker(target_checker, 'shown_to_target', 'shown_to_target') for target_checker in target_checkers]
-
-    # Call checking() for each killer instance and store the result
-    killer_checking_results = [handle_checker(killer_checker, 'shown_to_killer', 'shown_to_killer') for killer_checker in killer_checkers]
-
+    for checker in target_checkers:
+        handle_checker(checker)
+    
+    current = Player.objects.get(pk=request.user.player.pk)
     gm = GameManager()
     if gm.win_condition():
         
-        if request.user.player.is_winner:
+        if current.is_winner:
             state = 3
     else:
-        if any(target_checking_results) or request.user.player.is_dead:
+        if current.is_dead:
             state = 2
-        elif any(killer_checking_results):
-            state = 1
+        
         else:
-            if request.user.player.in_waiting:
+            if current.in_waiting:
                 return redirect(f'/?param=waiting')
             state = 0
 
