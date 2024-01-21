@@ -5,14 +5,30 @@ from django.http import HttpResponse
 import csv
 
 class PlayerAdmin(admin.ModelAdmin):
-    actions = ['assign_targets', 'save_info']
+    actions = ['assign_targets', 'save_info', 'admin_process_kill', 'discovered']
     list_display = ['user_name', 'is_dead', 'target_name', 'kills', 'is_playing', 'in_waiting']
 
     def assign_targets(self, request, queryset):
         gm = GameManager()
         gm.assign_targets()
 
-    
+    def discovered(self, request, queryset):
+        for player_instance in queryset:
+            player_instance.discovered()
+            player_instance.save()
+
+    def admin_process_kill(self, request, queryset):
+        for player_instance in queryset:
+           
+            targeting = Player.objects.get(pk=player_instance.target_pk)
+            gm = GameManager()
+
+            player_instance.kills += 1
+            player_instance.in_waiting = False
+            player_instance.save()
+
+
+            gm.new_target(player_instance, targeting)
 
     def user_name(self, obj):
         return obj.user.name
