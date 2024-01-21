@@ -11,3 +11,12 @@ class StatManager:
     def get_alive_players_count():
         # Return the count of alive players
         return Player.objects.filter(is_dead=False, is_playing = True).count()
+    
+    @staticmethod
+    def get_winner():
+        try:
+            returnable = Player.objects.filter(is_winner=True)[0]
+        except:
+            returnable = None
+        
+        return returnable

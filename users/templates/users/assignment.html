@@ -14,7 +14,8 @@
         {% if user.is_authenticated %}
             <div class="content">
                 {% if state == 0 %}
-                    <h2>Welcome, {{ user.first_name }} {{ user.last_name }}!</h2>
+                    <h2>Welcome, Agent {{ user.player.agent_name }}</h2>
+                    <h5>Eliminate your target as quickly as possible. We are counting on you</h3>
                     <p>Your target is: {{ user.player.target_name }}</p>
                     <button class="decision" data-param="died" style="background-color: red;">I Was Eliminated</button>
                     <button class="decision" data-param="killed" style="background-color: green;">Target Eliminated</button>
@@ -108,5 +109,12 @@ var confirmAction = confirm(actionMessage);
             });
         });
     </script>
+    <div class="navbar">
+        <a href="{% url 'users:home' %}">Home</a>
+        <a href="{% url 'users:rules' %}">Rules</a>
+        <a href="{% url 'users:complaints' %}">Feedback</a>
+        <a href="{% url 'users:logout' %}">Logout</a>
+    </div>
     </body>
+    
 </html>

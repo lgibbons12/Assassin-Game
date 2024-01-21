@@ -149,7 +149,62 @@ a:hover {
 
 /* Adjust styles for responsiveness */
 @media only screen and (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
+    .content {
+        padding: 15px;
+    }
+
+    button {
+        padding: 8px 15px;
+    }
+
     .statistics {
         padding: 15px;
     }
+}
+
+
+
+/* Add the following styles for the bottom navbar */
+.navbar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #1f1f1f;
+    padding: 10px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.navbar a:hover {
+    background-color: #FF4545; /* Red background on hover */
+    color: black; /* Text color on hover */
+}
+
+/* Style for the "See Assignment" button */
+
+
+.assignment-button {
+    background-color: red;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    display: inline-block; /* Ensures it behaves like a block-level element */
+    transition: background-color 0.3s ease;
+}
+
+.assignment-button:hover {
+    background-color: darkred;
 }

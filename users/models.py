@@ -17,15 +17,20 @@ class Player(models.Model):
     is_dead = models.BooleanField(default=False)
     target_name = models.CharField(max_length=255, blank=True, null=True)
     target_pk = models.IntegerField(null=True, blank=True)
+    agent_name = models.CharField(max_length=255, blank=True, null=True)
     kills = models.IntegerField(default=0)
     is_playing = models.BooleanField(default=True)
     is_winner = models.BooleanField(default=False)
     in_waiting = models.BooleanField(default=False)
+
     def set_target(self, target):
         self.target_name = target.user.name
         self.target_pk = target.pk
         self.save()
-
+    
+    def agent_selection(self, callsign):
+        self.agent_name = callsign
+        self.save()
     def discovered(self):
         self.is_dead = True
         self.save()
@@ -58,8 +63,7 @@ class Checker(models.Model):
     confirmations = models.IntegerField(default=0)
     target_confirmed = models.BooleanField(default=False)
     killer_confirmed = models.BooleanField(default=False)
-    shown_to_target = models.BooleanField(default=False)
-    shown_to_killer = models.BooleanField(default = False)
+    action_performed = models.BooleanField(default=False)
 
 
 
@@ -80,7 +84,7 @@ class Checker(models.Model):
 
     def checking(self):
         from .game import GameManager
-        if self.confirmations == 2:
+        if self.confirmations == 2 and self.action_performed == False:
             # Do something when both target and killer are confirmed
             gm = GameManager()
             if gm.win_condition():

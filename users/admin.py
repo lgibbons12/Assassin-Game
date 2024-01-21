@@ -60,7 +60,7 @@ class PlayerAdmin(admin.ModelAdmin):
 
 class CheckerAdmin(admin.ModelAdmin):
     actions = ['checking']
-    list_display = ['target_user', 'killer_user', 'confirmations', 'target_confirmed', 'killer_confirmed', 'shown_to_target', 'shown_to_killer']
+    list_display = ['target_user', 'killer_user', 'confirmations', 'target_confirmed', 'killer_confirmed', 'action_performed']
 
     def target_user(self, obj):
         return obj.target.user.name

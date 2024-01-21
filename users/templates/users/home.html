@@ -22,14 +22,15 @@
         <div class="user-info">
             <p>You are signed in as {{user.first_name}}</p>
             <div class="links">
-                <a href="assignment">See Your Assignment</a>
-                <a href="complaints">Submit a Complaint</a>
-                <a href="logout">Logout</a>
+                <a href="assignment" class="assignment-button">See Your Assignment</a>
             </div>
         </div>
 
         <div class="statistics">
             <h3>Game Statistics</h3>
+            {% if winner is not None %}
+            <h4><strong>Winner: </strong>{{ winner.user.name }}</h4>
+            {% endif %}
             <p><u>Players Alive</u>: {{ players_alive }}</p>
             <p><u>Top 5 Kill Leaders:</u></p>
             <ul>
@@ -37,8 +38,17 @@
                     <li><strong>{{ player.user.name }}</strong>: {{ player.kills }} kills</li>
                 {% endfor %}
             </ul>
+
+            
         </div>
         {% endif %}
+    </div>
+
+    <div class="navbar">
+        <a href="{% url 'users:home' %}">Home</a>
+        <a href="{% url 'users:rules' %}">Rules</a>
+        <a href="{% url 'users:complaints' %}">Feedback</a>
+        <a href="{% url 'users:logout' %}">Logout</a>
     </div>
 
     <script>
@@ -54,7 +64,10 @@
                 alert('Waiting for your target to confirm!');
             } else if (paramValue === "waiting") {
                 alert("Still waiting for confirmation");
+            } else if (paramValue === "noassignment") {
+                alert("Waiting for game to start");
             }
+
         }
     </script>
 
