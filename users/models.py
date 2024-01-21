@@ -100,5 +100,9 @@ class Checker(models.Model):
             gm.new_target(self.killer, self.target)
 
             return True
+
+        if self.action_performed == True:
+            if self.killer.target_pk == self.target.pk:
+                print("There has been an error")
         return False
     
