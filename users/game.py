@@ -316,20 +316,27 @@ class GameManager:
             GameManager._save_targets(target_list)
 
     @staticmethod
-    def assign_targets():
+    def assign_targets(new_game = True):
         Checker.objects.all().delete()
-        for player_instance in Player.objects.all():
-            # Set each field to its default value
-            player_instance.is_dead = False
-            player_instance.target_name = ''
-            player_instance.target_pk = None
-            player_instance.kills = 0
-            player_instance.in_waiting = False
-            
-            player_instance.is_winner = False
+        if new_game:
+            for player_instance in Player.objects.all():
+                # Set each field to its default value
+                player_instance.is_dead = False
+                player_instance.target_name = ''
+                player_instance.target_pk = None
+                player_instance.kills = 0
+                player_instance.in_waiting = False
+                
+                player_instance.is_winner = False
 
-            # Save the changes
-            player_instance.save()
+                # Save the changes
+                player_instance.save()
+        
+        else:
+            for player_instance in Player.objects.filter(is_playing=True, is_dead=False):
+                player_instance.target_name = ''
+                player_instance.target_pk = None
+                player_instance.in_waiting = False
         
 
         available_targets = list(Player.objects.filter(is_playing=True, is_dead=False).values_list('id', flat=True))

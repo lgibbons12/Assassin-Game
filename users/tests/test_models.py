@@ -18,7 +18,7 @@ class PlayerModelTestCase(TestCase):
         self.assertEqual(Player.objects.count(), 1)
         player = Player.objects.get(user=self.user)
         self.assertEqual(player.is_dead, False)
-        self.assertEqual(player.target_name, '')
+        self.assertEqual(player.target_name, None)
         self.assertEqual(player.target_pk, None)
         self.assertEqual(player.agent_name, None)
         self.assertEqual(player.kills, 0)
@@ -54,7 +54,7 @@ class PlayerModelTestCase(TestCase):
 
         # Set up Checker instances
         checker1 = Checker.objects.create(target=player1)
-        checker2 = Checker.objects.create(target=player2, killer=player1, target_confirmed=True, killer_confirmed=True)
+        checker2 = Checker.objects.create(target=player2, killer=player1, target_confirmed=True, killer_confirmed=True, confirmations = 2)
 
         # Call the checking method
         gm = GameManager()  # You might need to adjust this if GameManager needs initialization
@@ -62,10 +62,10 @@ class PlayerModelTestCase(TestCase):
 
         # Check the result and updated states
         self.assertEqual(result, True)
-        self.assertEqual(player1.is_dead, True)
+        self.assertEqual(player1.is_dead, False)
         self.assertEqual(player1.in_waiting, False)
         self.assertEqual(player1.kills, 1)
-        self.assertEqual(player2.is_dead, False)
+        self.assertEqual(player2.is_dead, True)
         self.assertEqual(player2.in_waiting, False)
         self.assertEqual(player2.kills, 0)
 
