@@ -3,38 +3,10 @@ from .models import CustomUser, Player, Checker
 from .game import GameManager
 from django.http import HttpResponse
 import csv
+import tempfile
 
-class PlayerAdmin(admin.ModelAdmin):
-    actions = ['assign_targets', 'save_info', 'admin_process_kill', 'discovered']
-    list_display = ['user_name', 'is_dead', 'target_name', 'kills', 'is_playing', 'in_waiting']
-
-    def assign_targets(self, request, queryset):
-        gm = GameManager()
-        gm.assign_targets()
-
-    def discovered(self, request, queryset):
-        for player_instance in queryset:
-            player_instance.discovered()
-            player_instance.save()
-
-    def admin_process_kill(self, request, queryset):
-        for player_instance in queryset:
-           
-            targeting = Player.objects.get(pk=player_instance.target_pk)
-            gm = GameManager()
-
-            player_instance.kills += 1
-            player_instance.in_waiting = False
-            player_instance.save()
-
-
-            gm.new_target(player_instance, targeting)
-
-    def user_name(self, obj):
-        return obj.user.name
-    
-    def save_info(self, request, queryset):
-        # Define the response as a CSV file
+def save_info(queryset):
+    # Define the response as a CSV file
         response = HttpResponse(content_type='text/csv')
         file_path = 'static/users/players_export.csv'
         response['Content-Disposition'] = f'attachment; filename="{file_path}"'
@@ -54,6 +26,68 @@ class PlayerAdmin(admin.ModelAdmin):
             csv_writer.writerow(data_row)
 
         return response
+class PlayerAdmin(admin.ModelAdmin):
+    actions = ['assign_targets', 'save_info','discovered', 'admin_process_kill', 'double_or_no', 'shuffle']
+    list_display = ['user_name', 'is_dead', 'kills', 'is_playing', 'in_waiting']
+    list_filter = ['is_dead', 'in_waiting']
+    search_fields = ['target_name']
+
+    def assign_targets(self, request, queryset):
+        gm = GameManager()
+        gm.assign_targets()
+
+    def shuffle(self, request, queryset):
+        response = save_info(queryset)  # Call save_info and store the response
+        GameManager().assign_targets(new_game=False)
+        return response
+        
+    def discovered(self, request, queryset):
+        for obj in queryset:
+            obj.discovered()
+
+    def double_or_no(modeladmin, request, queryset):
+        alive_players = Player.objects.filter(is_dead=False)
+
+        with tempfile.NamedTemporaryFile(mode='w+', delete=False) as temp_file:
+            for player_instance in alive_players:
+                target_count = Player.objects.filter(target_pk=player_instance.pk).count()
+
+                if target_count == 0:
+                    temp_file.write(f"{player_instance.user.name} has not been targeted by anyone.\n")
+                elif target_count > 1:
+                    temp_file.write(f"{player_instance.user.name} has been targeted by more than one person.\n")
+
+            # Provide the download link for the temp file
+            temp_file_path = temp_file.name
+
+        # Return the file response for download
+        with open(temp_file_path, 'r') as file:
+            response = HttpResponse(file.read(), content_type='text/plain')
+            response['Content-Disposition'] = f'attachment; filename=double_or_no_results.txt'
+
+        return response
+
+
+    def admin_process_kill(self, request, queryset):
+        for player_instance in queryset:
+
+            targeting = Player.objects.get(pk=player_instance.target_pk)
+            gm = GameManager()
+
+            player_instance.kills += 1
+            player_instance.in_waiting = False
+            player_instance.save()
+
+
+            gm.new_target(player_instance, targeting)
+
+
+    def user_name(self, obj):
+        return obj.user.name
+
+    def save_info(self, request, queryset):
+        response = save_info(queryset)
+        return response
 
 
     user_name.short_description = 'User Name'
@@ -61,7 +95,7 @@ class PlayerAdmin(admin.ModelAdmin):
 class CheckerAdmin(admin.ModelAdmin):
     actions = ['checking']
     list_display = ['target_user', 'killer_user', 'confirmations', 'target_confirmed', 'killer_confirmed', 'action_performed']
-
+    list_filter = ['target_confirmed', 'killer_confirmed', 'action_performed']
     def target_user(self, obj):
         return obj.target.user.name
 
