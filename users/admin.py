@@ -27,14 +27,20 @@ def save_info(queryset):
 
         return response
 class PlayerAdmin(admin.ModelAdmin):
-    actions = ['assign_targets', 'save_info','discovered', 'admin_process_kill', 'double_or_no', 'shuffle']
+    actions = ['assign_targets', 'save_info','discovered', 'admin_process_kill', 'double_or_no', 'shuffle',
+               'all_have_not_eliminated_today']
     list_display = ['user_name', 'is_dead', 'kills', 'is_playing', 'in_waiting']
-    list_filter = ['is_dead', 'in_waiting']
+    list_filter = ['is_dead', 'in_waiting', 'have_eliminated_today']
     search_fields = ['target_name']
 
     def assign_targets(self, request, queryset):
         gm = GameManager()
         gm.assign_targets()
+    
+    def all_have_not_eliminated_today(self, request, queryset):
+        for obj in Player.objects.filter(is_playing=True, is_dead=False):
+            obj.have_eliminated_today = False
+            obj.save()
 
     def shuffle(self, request, queryset):
         response = save_info(queryset)  # Call save_info and store the response

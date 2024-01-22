@@ -326,7 +326,7 @@ class GameManager:
                 player_instance.target_pk = None
                 player_instance.kills = 0
                 player_instance.in_waiting = False
-                
+                player_instance.have_eliminated_today = False
                 player_instance.is_winner = False
 
                 # Save the changes
@@ -336,7 +336,10 @@ class GameManager:
             for player_instance in Player.objects.filter(is_playing=True, is_dead=False):
                 player_instance.target_name = ''
                 player_instance.target_pk = None
+                player_instance.have_eliminated_today = False
                 player_instance.in_waiting = False
+
+                player_instance.save()
         
 
         available_targets = list(Player.objects.filter(is_playing=True, is_dead=False).values_list('id', flat=True))

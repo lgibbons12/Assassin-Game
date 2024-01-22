@@ -22,6 +22,7 @@ class Player(models.Model):
     is_playing = models.BooleanField(default=True)
     is_winner = models.BooleanField(default=False)
     in_waiting = models.BooleanField(default=False)
+    have_eliminated_today = models.BooleanField(default=False)
 
     def set_target(self, target):
         self.target_name = target.user.name
@@ -94,6 +95,7 @@ class Checker(models.Model):
             self.target.save()
 
             self.killer.kills += 1
+            self.killer.have_eliminated_today = True
             self.killer.in_waiting = False
             self.killer.save()
             
