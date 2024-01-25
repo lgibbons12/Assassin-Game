@@ -4,41 +4,59 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from users.models import Player, Checker, CustomUser
 from users.game import GameManager
-'''
-class GameTests(TestCase):
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from users.models import Player, Checker  # Import your Player and Checker models
+
+class YourAppTestCase(TestCase):
     def setUp(self):
-        # Create or get a test user
-        self.user, created = CustomUser.objects.get_or_create(
-            username='testuser',
-            defaults={'password': 'testpassword'}
-        )
+        self.players = []
 
-        # Create a player instance for the test user
-        self.player, created = Player.objects.get_or_create(user=self.user)
+        for i in range(1, 11):
+            # Try to get an existing user or create a new one
+            user, created = get_user_model().objects.get_or_create(
+                username=f'testuser{i}',
+                defaults={
+                    'password': f'testpassword{i}',
+                    'first_name': f'John{i}',
+                    'last_name': f'Doe{i}',
+                }
+            )
 
-    def test_home_view(self):
-        # Test the home view
-        response = self.client.get(reverse('users:home'))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Home Page')
+            # Try to get an existing player or create a new one
+            player, player_created = Player.objects.get_or_create(user=user)
 
-    def test_assignment_view(self):
-        # Test the assignment view
-        response = self.client.get(reverse('users:assignment'))
-        self.assertEqual(response.status_code, 302)  # Redirect to login since user not authenticated
+            # Append the player to the list
+            self.players.append(player)
 
-        # Log in the user
-        self.client.login(username='testuser', password='testpassword')
-        response = self.client.get(reverse('users:assignment'))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Assignment Page')
+    def test_assign_targets(self):
+        GameManager().assign_targets()
+        # Initial targets.json content
+        initial_targets = GameManager._load_targets()
 
-    
-    def test_new_target_game_logic(self):
-        # Test the new_target game logic
-        target_player = Player.objects.create(user=get_user_model().objects.create_user(username='targetuser'))
-        GameManager.new_target(self.player, target_player)
-        self.assertEqual(self.player.target_pk, target_player.pk)
-    '''
+        for _ in range(10):
+            # Run assign_targets with new_game=False
+            GameManager.assign_targets(new_game=False)
+
+            # Updated targets.json content
+            updated_targets = GameManager._load_targets()
+
+            # Check if both lists have the same elements
+            self.assertCountEqual(initial_targets, updated_targets)
+
+        # You can also check specific positions if needed
+        # self.assertEqual(initial_targets[0], updated_targets[1])
+
+        # Additional assertions or checks as needed
+        # ...
+
+        # Clean up any changes made during the test
+        
+
+        # Reset the players if needed
+       
+
+        # Additional cleanup steps if needed
+        # ...
 
     # Add more test methods as needed for other views and game logic

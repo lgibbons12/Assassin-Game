@@ -360,7 +360,7 @@ class GameManager:
             player_to_set.agent_selection(spy_callsigns[idx])
             player_to_set.save()
 
-            print(f"{player_to_set.user.name}'s target is {target_player.user.name}")
+            
 
     @staticmethod
     def _load_targets():
