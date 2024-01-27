@@ -41,8 +41,19 @@ class Player(models.Model):
         checker_instance.target_confirm()
         checker_instance.save()
 
-    
+    def self_defense_killed(self):
+        targeting = Player.objects.get(target_pk = self.pk)
+        checker_instance, created = Checker.objects.get_or_create(target=targeting)
 
+        checker_instance.killer = self
+        checker_instance.self_defense = True
+        checker_instance.killer_confirm()
+        checker_instance.save()
+    
+    def self_defense_died(self):
+        checker_instance, created = Checker.objects.get_or_create(target=self)
+        checker_instance.target_confirm()
+        checker_instance.save()
 
     def kill_target(self):
         targeting = Player.objects.get(pk = self.target_pk)
@@ -62,6 +73,7 @@ class Checker(models.Model):
     target = models.ForeignKey('Player', related_name='target_checker', on_delete=models.CASCADE)
     killer = models.ForeignKey('Player', related_name='killer_checker', null=True, blank=True, on_delete=models.CASCADE)
     confirmations = models.IntegerField(default=0)
+    self_defense = models.BooleanField(default=False)
     target_confirmed = models.BooleanField(default=False)
     killer_confirmed = models.BooleanField(default=False)
     action_performed = models.BooleanField(default=False)
@@ -85,6 +97,20 @@ class Checker(models.Model):
 
     def checking(self):
         from .game import GameManager
+        if self.self_defense and self.confirmations == 2 and self.action_performed == False:
+            gm = GameManager()
+            if gm.win_condition():
+                return False
+            
+            self.target.is_dead = True
+            self.target.in_waiting = False
+            self.target.save()
+
+            self.killer.kills += 1
+            self.killer.have_eliminated_today = True
+            self.killer.in_waiting = False
+            self.killer.save()
+
         if self.confirmations == 2 and self.action_performed == False:
             # Do something when both target and killer are confirmed
             gm = GameManager()

@@ -20,7 +20,8 @@
                     <button class="decision" data-param="died" style="background-color: red;">I Was Eliminated</button>
                     <button class="decision" data-param="killed" style="background-color: green;">Target Eliminated</button>
                     <button class="decision" data-param="discovered" style="background-color: blue;">I Was Discovered</button>
-
+                    <button class="decision" data-param="selfDefenseKilled" style="background-color: blueviolet;">I Eliminated in Self-Defense</button>
+                    <button class="decision" data-param="selfDefenseDied" style="background-color:coral;">I was Eliminated From Self-Defense</button>
                     <h2 id="notification"></h2>
                 {% elif state == 1 %}
                     <p>You killed your target!</p>
@@ -70,6 +71,10 @@ if (param === 'died') {
     actionMessage = 'Are you sure you want to confirm that you eliminated your target?';
 } else if (param === 'discovered') {
     actionMessage = 'Are you sure you want to confirm that you were discovered?';
+} else if (param === "selfDefenseKilled") {
+    actionMessage = 'Are you sure you want to confirm you eliminated in self-defense?';
+} else if (param === "selfDefenseDied") {
+    actionMessage = 'Are you sure you want to confirm you were eliminated in self-defense?'
 } else {
     actionMessage = 'Are you sure you want to proceed with this action?';
 }

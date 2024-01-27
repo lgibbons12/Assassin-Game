@@ -287,10 +287,9 @@ class GameManager:
         
         return False
             
-         
     @staticmethod
     def new_target(player, target_killed):
-        print("i was called")
+        
         if GameManager.win_condition():
             return
         
@@ -301,9 +300,10 @@ class GameManager:
         if target_list:
             # Remove the target_killed from the list
             pk_to_remove = target_killed.pk
-            if not pk_to_remove in target_list:
-                return
-            index_to_delete = target_list.index(pk_to_remove)
+            try:
+                index_to_delete = target_list.index(pk_to_remove)
+            except:
+                GameManager._refresh_targets()
             try:
                 next_target_player = Player.objects.get(pk=target_list[index_to_delete + 1])
             except IndexError:
@@ -315,10 +315,57 @@ class GameManager:
             # Save the updated target list to the JSON file
             GameManager._save_targets(target_list)
 
+            GameManager._refresh_targets()
+    
+
+    @staticmethod
+    def _refresh_targets():
+         # Get all alive players
+        alive_players = Player.objects.filter(is_playing=True, is_dead=False)
+
+        # Get the target list
+        target_list = GameManager._load_targets()
+
+        # Create sets of target_pks and pks
+        current_targets_set = set(target_list)
+        alive_players_set = set(alive_players.values_list('pk', flat=True))
+
+        if len(current_targets_set) == len(alive_players_set):
+            # All alive players have a target, everything is okay
+            return
+        elif len(current_targets_set) > len(alive_players_set):
+            # There are players without alive targets
+            dead_pk_in_loop = current_targets_set - alive_players_set
+            
+            for dead_pk in dead_pk_in_loop:
+                dead_player = Player.objects.get(pk=dead_pk)
+                player = Player.objects.filter(target_pk=dead_pk)
+                GameManager.new_target(player, dead_player)
+
+        elif len(current_targets_set) < len(alive_players_set):
+            #there are more alive players than the current target set
+            out_of_loop_pks = alive_players_set - current_targets_set
+
+            for ool_pk in out_of_loop_pks:
+                last_player = Player.objects.get(pk=target_list[-1])
+                target_list.append(ool_pk)
+                ool_player = Player.objects.get(pk=ool_pk)
+                
+                last_player.set_target(ool_player)
+                ool_player.set_target(target_list[0])
+                
+            # Save the updated target list
+        
+        GameManager._save_targets(target_list)
+
+           
+        
+
     @staticmethod
     def assign_targets(new_game = True):
-        Checker.objects.all().delete()
+        
         if new_game:
+            Checker.objects.all().delete()
             for player_instance in Player.objects.all():
                 # Set each field to its default value
                 player_instance.is_dead = False
