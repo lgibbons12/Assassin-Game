@@ -43,9 +43,9 @@ class PlayerAdmin(admin.ModelAdmin):
             obj.save()
 
     def shuffle(self, request, queryset):
-        response = save_info(queryset)  # Call save_info and store the response
+        #response = save_info(queryset)  # Call save_info and store the response
         GameManager().assign_targets(new_game=False)
-        return response
+        #return response
         
     def discovered(self, request, queryset):
         for obj in queryset:
