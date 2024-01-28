@@ -2,7 +2,7 @@ import json
 import os
 import random
 from .models import Player, Checker
-
+from django.db.models import F
 spy_callsigns = [
     "Ace",
     "Agent",
@@ -330,6 +330,20 @@ class GameManager:
         current_targets_set = set(target_list)
         alive_players_set = set(alive_players.values_list('pk', flat=True))
 
+        
+
+        def reset(t_list):
+            # Assign targets sequentially
+            for idx in t_list:
+                player = Player.objects.get(pk=idx)
+                if idx < len(t_list) - 1:
+                    target_player = Player.objects.get(pk=t_list[idx + 1])
+                else:
+                    target_player = Player.objects.get(pk=t_list[0])
+
+                player.set_target(target_player)
+                player.save()
+
         if len(current_targets_set) == len(alive_players_set):
             # All alive players have a target, everything is okay
             return
@@ -339,14 +353,18 @@ class GameManager:
             
             for dead_pk in dead_pk_in_loop:
                 dead_player = Player.objects.get(pk=dead_pk)
-                player = Player.objects.filter(target_pk=dead_pk)
-                GameManager.new_target(player, dead_player)
+                player = Player.objects.filter(target_pk=dead_pk).first()
+                if player is not None:
+                    GameManager.new_target(player, dead_player)
+            
+            #reset(target_list)
 
         elif len(current_targets_set) < len(alive_players_set):
             #there are more alive players than the current target set
             out_of_loop_pks = alive_players_set - current_targets_set
 
             for ool_pk in out_of_loop_pks:
+
                 last_player = Player.objects.get(pk=target_list[-1])
                 target_list.append(ool_pk)
                 ool_player = Player.objects.get(pk=ool_pk)
@@ -355,6 +373,8 @@ class GameManager:
                 ool_player.set_target(target_list[0])
                 
             # Save the updated target list
+            #reset(target_list)
+
         
         GameManager._save_targets(target_list)
 

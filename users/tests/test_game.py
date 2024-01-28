@@ -7,7 +7,8 @@ from users.game import GameManager
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from users.models import Player, Checker  # Import your Player and Checker models
-
+import random
+import json
 class YourAppTestCase(TestCase):
     def setUp(self):
         self.players = []
@@ -59,4 +60,75 @@ class YourAppTestCase(TestCase):
         # Additional cleanup steps if needed
         # ...
 
+    def test_follow_through(self):
+        GameManager().assign_targets()
+
+        while len(Player.objects.filter(is_dead=False, is_playing=True)) > 1:
+            player = random.choice(Player.objects.filter(is_dead=False, is_playing=True))
+            target = Player.objects.get(pk=player.target_pk)
+            
+            player.kill_target()
+            target.get_killed()
+
+            target_checkers = Checker.objects.filter(confirmations=2, action_performed=False)
+
+            for checker in target_checkers:
+                checker.checking()
+        
+        self.assertTrue(GameManager.win_condition())
+        
+    
+    def test_with_discovery(self):
+        GameManager().assign_targets()
+        thing = 0
+        while len(Player.objects.filter(is_dead=False, is_playing=True)) > 1:
+            player = random.choice(Player.objects.filter(is_dead=False, is_playing=True))
+            if thing % 4 == 0:
+                player.discovered()
+            else:
+                player = random.choice(Player.objects.filter(is_dead=False, is_playing=True))
+
+                target = Player.objects.get(pk=player.target_pk)
+                if target.is_dead:
+                    GameManager().new_target(player, target)
+                    target = Player.objects.get(pk=player.target_pk)
+                player.kill_target()
+                target.get_killed()
+
+                target_checkers = Checker.objects.filter(confirmations=2, action_performed=False)
+
+                for checker in target_checkers:
+                    checker.checking()
+            
+            thing += 1
+        
+        self.assertTrue(GameManager.win_condition())
+        
+
+    def test_with_self_defense(self):
+        GameManager().assign_targets()
+
+        
+
+        while len(Player.objects.filter(is_dead = False, is_playing=True)) > 1:
+            player = random.choice(Player.objects.filter(is_dead = False, is_playing = True))
+            
+            self_defensed = Player.objects.filter(is_dead=False, target_pk = player.pk).first()
+            # Check if target player exists and is alive
+            if self_defensed is None or self_defensed.is_dead:
+                GameManager()._refresh_targets()
+                continue  # Restart the loop to get a valid target player
+        
+
+            player.self_defense_killed()
+            self_defensed.self_defense_died()
+            target_checkers = Checker.objects.filter(confirmations=2, action_performed=False)
+
+            for checker in target_checkers:
+                checker.checking()
+        
+        self.assertTrue(GameManager().win_condition())
+        
+
+        
     # Add more test methods as needed for other views and game logic

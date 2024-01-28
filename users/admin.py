@@ -84,7 +84,15 @@ class PlayerAdmin(admin.ModelAdmin):
 
 class CheckerAdmin(admin.ModelAdmin):
     actions = ['checking']
-    list_display = ['target_pk', 'killer_pk', 'confirmations', 'target_confirmed', 'killer_confirmed', 'action_performed']
+    list_display = ['get_target_pk', 'get_killer_pk', 'confirmations', 'target_confirmed', 'killer_confirmed', 'action_performed']
+
+    def get_target_pk(self, obj):
+        return obj.target.pk if obj.target else None
+    get_target_pk.short_description = 'Target PK'
+
+    def get_killer_pk(self, obj):
+        return obj.killer.pk if obj.killer else None
+    get_killer_pk.short_description = 'Killer PK'
     list_filter = ['target_confirmed', 'killer_confirmed', 'action_performed']
     def target_user(self, obj):
         return obj.target.user.name
