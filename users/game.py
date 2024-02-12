@@ -1,7 +1,7 @@
 import json
 import os
 import random
-from .models import Player, Checker
+from .models import Player, Checker, AgentGroup
 from django.db.models import F
 spy_callsigns = [
     "Ace",
@@ -379,8 +379,60 @@ class GameManager:
         GameManager._save_targets(target_list)
 
            
+    @staticmethod
+    def assign_group_targets(new_game = True):
+        if new_game:
+            Checker.objects.all.delete()
         
+            for player_instance in Player.objects.all():
+                    # Set each field to its default value
+                    player_instance.is_dead = False
+                    player_instance.target_name = ''
+                    player_instance.target_pk = None
+                    player_instance.kills = 0
+                    player_instance.in_waiting = False
+                    player_instance.have_eliminated_today = False
+                    player_instance.is_winner = False
 
+                    # Save the changes
+                    player_instance.save()
+            for group_instance in AgentGroup.objects.all():
+                group_instance.is_out = False
+                group_instance.target_group_name = ''
+                group_instance.target_group_pk = None
+                group_instance.kills = 0
+                group_instance.is_winner = False
+
+        else:
+            for player_instance in Player.objects.filter(is_playing=True, is_dead=False):
+                player_instance.target_name = ''
+                player_instance.target_pk = None
+                player_instance.have_eliminated_today = False
+                player_instance.in_waiting = False
+
+                player_instance.save()
+            
+            for group_instance in AgentGroup.objects.filter(is_playing = True, is_out = False):
+                group_instance.target_group_name = ''
+                group_instance.target_group_pk = None
+                
+
+        available_targets = list(AgentGroup.objects.filter(is_playing=True, is_out = False).values_list('id', flat=True))
+        random.shuffle(available_targets)
+        random.shuffle(spy_callsigns)
+
+        GameManager._save_targets(available_targets)
+
+        for idx, group_id in enumerate(available_targets):
+            if group_id != available_targets[-1]:
+                target_group = AgentGroup.objects.get(pk=available_targets[idx+1])
+            else:
+                target_group = AgentGroup.objects.get(pk=available_targets[0])
+
+            group_to_set = AgentGroup.objects.get(pk=available_targets[idx])
+            group_to_set.set_target(target_group)
+            group_to_set.agent_selection(spy_callsigns[idx])
+            group_to_set.save()
     @staticmethod
     def assign_targets(new_game = True):
         

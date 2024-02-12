@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser, Player, Checker
+from .models import CustomUser, Player, Checker, AgentGroup
 from .game import GameManager
 from django.http import HttpResponse
 import csv
@@ -113,9 +113,24 @@ class CheckerAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj.checking()
 
+
+
+
+class AgentGroupAdmin(admin.ModelAdmin):
+    actions = ['assignGroupTargets']
+    list_display = ['group_name', 'get_players', 'is_out', 'is_playing']
+
+    def get_players(self, obj):
+        return ", ".join([f"{player.user.first_name} {player.user.last_name}" for player in obj.players.all()])
+
+    get_players.short_description = 'Players'
+
+    def assignGroupTargets(self, request, queryset):
+        GameManager().assign_group_targets()
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active']
 
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Player, PlayerAdmin)
 admin.site.register(Checker, CheckerAdmin)
+admin.site.register(AgentGroup, AgentGroupAdmin)

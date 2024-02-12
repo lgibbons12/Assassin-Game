@@ -174,3 +174,15 @@ class Checker(models.Model):
                 print("There has been an error")
         return False
     
+
+class AgentGroup(models.Model):
+    group_name = models.CharField(max_length = 255, blank=True, null=True)
+    players = models.ManyToManyField(Player)
+    is_out = models.BooleanField(default=False)
+    target_group_name = models.CharField(max_length=255, blank=True, null=True)
+    target_group_pk = models.IntegerField(null=True, blank=True)
+    kills = models.IntegerField(default=0)
+    is_playing = models.BooleanField(default=True)
+    is_winner = models.BooleanField(default=False)
+
+
