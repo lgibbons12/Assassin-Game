@@ -19,6 +19,7 @@ def home(request):
 
 #view that shows the assignemtn
 def assignment(request):
+    
     try:
         target = Player.objects.get(pk=request.user.player.target_pk)
     except Player.DoesNotExist:
@@ -26,6 +27,8 @@ def assignment(request):
     if target.is_dead:
         GameManager().new_target(request.user.player, target)
     
+    print(target.user.name)
+    print(target.is_dead)
     user_pk = request.user.pk
     state = -1
 
@@ -89,6 +92,11 @@ def handling(request):
         elif param == "discovered":
             user.player.discovered()
         
+        elif param == "selfDefenseKilled":
+            user.player.self_defense_killed()
+        
+        elif param == "selfDefenseDied":
+            user.player.self_defense_died()
         else:
             raise ValueError("wrong param")
         

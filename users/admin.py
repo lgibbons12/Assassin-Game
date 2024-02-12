@@ -3,38 +3,10 @@ from .models import CustomUser, Player, Checker
 from .game import GameManager
 from django.http import HttpResponse
 import csv
+import tempfile
 
-class PlayerAdmin(admin.ModelAdmin):
-    actions = ['assign_targets', 'save_info', 'admin_process_kill', 'discovered']
-    list_display = ['user_name', 'is_dead', 'target_name', 'kills', 'is_playing', 'in_waiting']
-
-    def assign_targets(self, request, queryset):
-        gm = GameManager()
-        gm.assign_targets()
-
-    def discovered(self, request, queryset):
-        for player_instance in queryset:
-            player_instance.discovered()
-            player_instance.save()
-
-    def admin_process_kill(self, request, queryset):
-        for player_instance in queryset:
-           
-            targeting = Player.objects.get(pk=player_instance.target_pk)
-            gm = GameManager()
-
-            player_instance.kills += 1
-            player_instance.in_waiting = False
-            player_instance.save()
-
-
-            gm.new_target(player_instance, targeting)
-
-    def user_name(self, obj):
-        return obj.user.name
-    
-    def save_info(self, request, queryset):
-        # Define the response as a CSV file
+def save_info(queryset):
+    # Define the response as a CSV file
         response = HttpResponse(content_type='text/csv')
         file_path = 'static/users/players_export.csv'
         response['Content-Disposition'] = f'attachment; filename="{file_path}"'
@@ -54,19 +26,85 @@ class PlayerAdmin(admin.ModelAdmin):
             csv_writer.writerow(data_row)
 
         return response
+class PlayerAdmin(admin.ModelAdmin):
+    actions = ['assign_targets', 'save_info','discovered', 'killed_target', 'shuffle',
+               'all_have_not_eliminated_today']
+    list_display = ['pk', 'is_dead', 'kills', 'is_playing', 'in_waiting']
+    list_filter = ['is_dead', 'in_waiting', 'have_eliminated_today', 'is_playing']
+    search_fields = ['target_name']
+
+    def assign_targets(self, request, queryset):
+        gm = GameManager()
+        gm.assign_targets()
+    
+    def all_have_not_eliminated_today(self, request, queryset):
+        for obj in Player.objects.filter(is_playing=True, is_dead=False):
+            obj.have_eliminated_today = False
+            obj.save()
+
+    def shuffle(self, request, queryset):
+        #response = save_info(queryset)  # Call save_info and store the response
+        GameManager().assign_targets(new_game=False)
+        #return response
+        
+    def discovered(self, request, queryset):
+        for obj in queryset:
+            obj.discovered()
+
+    
+    def killed_target(self, request, queryset):
+        for player_instance in queryset:
+
+            gm = GameManager()
+            if gm.win_condition():
+                return False
+            player_instance.target.is_dead = True
+            player_instance.target.in_waiting = False
+            player_instance.target.save()
+
+            player_instance.killer.kills += 1
+            player_instance.killer.have_eliminated_today = True
+            player_instance.killer.in_waiting = False
+            player_instance.killer.save()
+            
+            gm.new_target(self.killer, self.target)
+
+
+           
+
+    def user_name(self, obj):
+        return obj.user.name
+
+    def save_info(self, request, queryset):
+        response = save_info(queryset)
+        return response
 
 
     user_name.short_description = 'User Name'
 
 class CheckerAdmin(admin.ModelAdmin):
     actions = ['checking']
-    list_display = ['target_user', 'killer_user', 'confirmations', 'target_confirmed', 'killer_confirmed', 'action_performed']
+    list_display = ['get_target_pk', 'get_killer_pk', 'confirmations', 'target_confirmed', 'killer_confirmed', 'action_performed']
 
+    def get_target_pk(self, obj):
+        return obj.target.pk if obj.target else None
+    get_target_pk.short_description = 'Target PK'
+
+    def get_killer_pk(self, obj):
+        return obj.killer.pk if obj.killer else None
+    get_killer_pk.short_description = 'Killer PK'
+    list_filter = ['target_confirmed', 'killer_confirmed', 'action_performed']
     def target_user(self, obj):
         return obj.target.user.name
 
     def killer_user(self, obj):
         return obj.killer.user.name if obj.killer else None
+    
+    def target_pk(self, obj):
+        return obj.target.pk
+    
+    def killer_pk(self, obj):
+        return obj.killer.pk
 
     target_user.short_description = 'Target User'
     killer_user.short_description = 'Killer User'

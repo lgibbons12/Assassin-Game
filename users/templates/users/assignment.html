@@ -7,6 +7,54 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Your Assignment</title>
     <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
+    <style>
+        /* Define a common style for the decision buttons */
+    
+        /* Style for the div containing "I Was Eliminated" and "Target Eliminated" */
+        #normalActions {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            color: red;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            border: 5px solid red;
+        }
+    
+        /* Style for the div containing "I Was Discovered" */
+        #discoveredActions {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            color: lightblue;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            border: 5px solid lightblue;
+        }
+    
+        /* Style for the div containing self-defense actions */
+        #selfDefenseActions {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center; /* Center the buttons horizontally */
+            color: lightpink;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            border: 5px solid lightpink;
+        }
+    
+        /* Style for the buttons inside the divs */
+        #selfDefenseActions button,
+        #discoveredActions button,
+        #normalActions button {
+            margin: 0 10px; /* Adjust the spacing between buttons if needed */
+            flex-direction: column;
+        }
+    </style>
 </head>
 <body>
 
@@ -17,11 +65,28 @@
                     <h2>Welcome, Agent {{ user.player.agent_name }}</h2>
                     <h5>Eliminate your target as quickly as possible. We are counting on you</h3>
                     <p>Your target is: {{ user.player.target_name }}</p>
+                    
+                     <!-- Div for "I Was Eliminated" and "Target Eliminated" -->
+                <div id="normalActions">
+                    <p>Normal Elimination:</p>
+                    <br>
                     <button class="decision" data-param="died" style="background-color: red;">I Was Eliminated</button>
-                    <button class="decision" data-param="killed" style="background-color: green;">Target Eliminated</button>
-                    <button class="decision" data-param="discovered" style="background-color: blue;">I Was Discovered</button>
+                    <button class="decision" data-param="killed" style="background-color: green;">I Eliminated My Target</button>
+                </div>
 
-                    <h2 id="notification"></h2>
+                <!-- Div for "I Was Discovered" -->
+                <div id="discoveredActions">
+                    <p>Someone Witnessed You:</p>
+                    <button class="decision" data-param="discovered" style="background-color: blue;">I Was Discovered</button>
+                </div>
+
+                <!-- Div for self-defense actions -->
+                <div id="selfDefenseActions">
+                    <p>Self-Defense Elimination:</p>
+                    <button class="decision" data-param="selfDefenseKilled" style="background-color: blueviolet;">I Eliminated My Hunter in Self-Defense</button>
+                    <button class="decision" data-param="selfDefenseDied" style="background-color:coral;">I was Eliminated By My Target In Self-Defense</button>
+                </div>
+                <h2 id="notification"></h2>
                 {% elif state == 1 %}
                     <p>You killed your target!</p>
                     <p>Reload page to see your new target</p>
@@ -70,6 +135,10 @@ if (param === 'died') {
     actionMessage = 'Are you sure you want to confirm that you eliminated your target?';
 } else if (param === 'discovered') {
     actionMessage = 'Are you sure you want to confirm that you were discovered?';
+} else if (param === "selfDefenseKilled") {
+    actionMessage = 'Are you sure you want to confirm you eliminated in self-defense?';
+} else if (param === "selfDefenseDied") {
+    actionMessage = 'Are you sure you want to confirm you were eliminated in self-defense?'
 } else {
     actionMessage = 'Are you sure you want to proceed with this action?';
 }

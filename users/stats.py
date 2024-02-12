@@ -1,5 +1,5 @@
 from .models import Player
-
+import random
 class StatManager:
 
     @staticmethod
@@ -10,7 +10,18 @@ class StatManager:
     @staticmethod
     def get_alive_players_count():
         # Return the count of alive players
-        return Player.objects.filter(is_dead=False, is_playing = True).count()
+        count = Player.objects.filter(is_dead=False, is_playing = True).count()
+        
+        if count < 10:
+            return 10
+        elif count < 20:
+            return 20
+        elif count < 30:
+            return 30
+        else:
+            return count
+        
+        
     
     @staticmethod
     def get_winner():

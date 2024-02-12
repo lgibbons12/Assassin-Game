@@ -31,7 +31,18 @@
             {% if winner is not None %}
             <h4><strong>Winner: </strong>{{ winner.user.name }}</h4>
             {% endif %}
+
+            <!-- Logic for displaying # of players alive -->
+            
+            {% if players_alive == 10 %}
+            <p>Less than 10 players alive!</p>
+            {% elif players_alive == 20 %}
+            <p>Less than 20 players alive!</p>
+            {% elif players_alive == 30 %}
+            <p>Less than 30 players alive!</p>
+            {% else %}
             <p><u>Players Alive</u>: {{ players_alive }}</p>
+            {% endif %}
             <p><u>Top 5 Kill Leaders:</u></p>
             <ul>
                 {% for player in kill_leaders %}
