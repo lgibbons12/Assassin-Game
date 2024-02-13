@@ -1,4 +1,4 @@
-from .models import Player
+from .models import Player, AgentGroup
 import random
 class StatManager:
 
@@ -25,9 +25,18 @@ class StatManager:
     
     @staticmethod
     def get_winner():
-        try:
-            returnable = Player.objects.filter(is_winner=True)[0]
-        except:
-            returnable = None
-        
-        return returnable
+        player_winner = Player.objects.filter(is_winner=True)
+        group_winner = AgentGroup.objects.filter(is_winner=True)
+        returning = []
+        if player_winner.count() == 1:
+            returning.append(1)
+            returning.append(player_winner[0])
+        elif group_winner.count() == 1:
+            returning.append(2)
+            returning.append(group_winner[0])
+        else:
+            returning.append(0)
+            returning.append(None)
+
+        return returning
+       

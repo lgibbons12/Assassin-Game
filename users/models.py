@@ -23,7 +23,7 @@ class Player(models.Model):
     is_winner = models.BooleanField(default=False)
     in_waiting = models.BooleanField(default=False)
     have_eliminated_today = models.BooleanField(default=False)
-
+   
     def set_target(self, target):
         self.target_name = target.user.name
         self.target_pk = target.pk
@@ -75,6 +75,7 @@ class Player(models.Model):
             # If the Checker doesn't exist, create a new one with the target confirmed
             checker_instance = Checker.objects.create(target=self, self_defense=True)
             checker_instance.target_confirm()
+            checker_instance.save()
 
 
     def kill_target(self):
@@ -178,11 +179,20 @@ class Checker(models.Model):
 class AgentGroup(models.Model):
     group_name = models.CharField(max_length = 255, blank=True, null=True)
     players = models.ManyToManyField(Player)
-    is_out = models.BooleanField(default=False)
+    is_out = models.BooleanField(default=True)
     target_group_name = models.CharField(max_length=255, blank=True, null=True)
     target_group_pk = models.IntegerField(null=True, blank=True)
     kills = models.IntegerField(default=0)
     is_playing = models.BooleanField(default=True)
     is_winner = models.BooleanField(default=False)
+
+    def set_target(self, target):
+        self.target_group_name = target.group_name
+        self.target_group_pk = target.pk
+        self.save()
+    
+    
+    
+        
 
 

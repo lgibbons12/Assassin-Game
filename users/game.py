@@ -277,20 +277,54 @@ class GameManager:
 
     @staticmethod
     def win_condition():
+        living_groups = AgentGroup.objects.filter(is_playing=True, is_out = False)
+
+        if living_groups.count() == 1:
+            winner = living_groups.get()
+            winner.is_winner = True
+            winner.save()
+            return 1
+        
         living_players = Player.objects.filter(is_dead=False, is_playing=True)
 
         if living_players.count() == 1:
             winner = living_players.get()
             winner.is_winner = True
             winner.save()
-            return True
+            return 2
         
-        return False
-            
+        return 0
+    
+    @staticmethod
+    def new_group_target(group, group_killed):
+        if GameManager.win_condition() != 0:
+            return
+        
+
+        target_list = GameManager._load_targets()
+
+        if target_list:
+            pk_to_remove = group_killed.pk
+            try:
+                index_to_delete = target_list.index(pk_to_remove)
+            except:
+                #GameManager._refresh_targets()
+                return
+            try:
+                next_target_group = AgentGroup.objects.get(pk=target_list[index_to_delete + 1])
+            except IndexError:
+                next_target_group = AgentGroup.objects.get(pk=target_list[0])
+            group.set_target(next_target_group)
+            group.save()
+            del target_list[index_to_delete]
+
+            # Save the updated target list to the JSON file
+            GameManager._save_targets(target_list)
+
     @staticmethod
     def new_target(player, target_killed):
         
-        if GameManager.win_condition():
+        if GameManager.win_condition() != 0:
             return
         
         
@@ -303,7 +337,9 @@ class GameManager:
             try:
                 index_to_delete = target_list.index(pk_to_remove)
             except:
-                GameManager._refresh_targets()
+                #GameManager._refresh_targets()
+                #this is a big change i made that could mess things up
+                return
             try:
                 next_target_player = Player.objects.get(pk=target_list[index_to_delete + 1])
             except IndexError:
@@ -315,7 +351,7 @@ class GameManager:
             # Save the updated target list to the JSON file
             GameManager._save_targets(target_list)
 
-            GameManager._refresh_targets()
+            #GameManager._refresh_targets()
     
 
     @staticmethod
@@ -382,9 +418,9 @@ class GameManager:
     @staticmethod
     def assign_group_targets(new_game = True):
         if new_game:
-            Checker.objects.all.delete()
+            Checker.objects.all().delete()
         
-            for player_instance in Player.objects.all():
+            for player_instance in Player.objects.filter(is_playing=True):
                     # Set each field to its default value
                     player_instance.is_dead = False
                     player_instance.target_name = ''
@@ -419,7 +455,7 @@ class GameManager:
 
         available_targets = list(AgentGroup.objects.filter(is_playing=True, is_out = False).values_list('id', flat=True))
         random.shuffle(available_targets)
-        random.shuffle(spy_callsigns)
+        
 
         GameManager._save_targets(available_targets)
 
@@ -431,14 +467,16 @@ class GameManager:
 
             group_to_set = AgentGroup.objects.get(pk=available_targets[idx])
             group_to_set.set_target(target_group)
-            group_to_set.agent_selection(spy_callsigns[idx])
+            
             group_to_set.save()
     @staticmethod
     def assign_targets(new_game = True):
-        
+        for obj in AgentGroup.objects.all():
+            obj.is_out = True
+            obj.save()
         if new_game:
             Checker.objects.all().delete()
-            for player_instance in Player.objects.all():
+            for player_instance in Player.objects.filter(is_playing=True):
                 # Set each field to its default value
                 player_instance.is_dead = False
                 player_instance.target_name = ''

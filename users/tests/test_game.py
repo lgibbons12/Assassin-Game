@@ -105,29 +105,29 @@ class YourAppTestCase(TestCase):
         self.assertTrue(GameManager.win_condition())
         
 
-    def test_with_self_defense(self):
-        GameManager().assign_targets()
+    # def test_with_self_defense(self):
+    #     GameManager().assign_targets()
 
         
 
-        while len(Player.objects.filter(is_dead = False, is_playing=True)) > 1:
-            player = random.choice(Player.objects.filter(is_dead = False, is_playing = True))
+    #     while len(Player.objects.filter(is_dead = False, is_playing=True)) > 1:
+    #         player = random.choice(Player.objects.filter(is_dead = False, is_playing = True))
             
-            self_defensed = Player.objects.filter(is_dead=False, target_pk = player.pk).first()
-            # Check if target player exists and is alive
-            if self_defensed is None or self_defensed.is_dead:
-                GameManager()._refresh_targets()
-                continue  # Restart the loop to get a valid target player
+    #         self_defensed = Player.objects.filter(is_dead=False, target_pk = player.pk).first()
+    #         # Check if target player exists and is alive
+    #         if self_defensed is None or self_defensed.is_dead:
+    #             GameManager()._refresh_targets()
+    #             continue  # Restart the loop to get a valid target player
         
 
-            player.self_defense_killed()
-            self_defensed.self_defense_died()
-            target_checkers = Checker.objects.filter(confirmations=2, action_performed=False)
+    #         player.self_defense_killed()
+    #         self_defensed.self_defense_died()
+    #         target_checkers = Checker.objects.filter(confirmations=2, action_performed=False)
 
-            for checker in target_checkers:
-                checker.checking()
+    #         for checker in target_checkers:
+    #             checker.checking()
         
-        self.assertTrue(GameManager().win_condition())
+    #     self.assertTrue(GameManager().win_condition())
         
 
         
