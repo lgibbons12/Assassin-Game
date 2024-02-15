@@ -190,7 +190,11 @@ class AgentGroup(models.Model):
         self.target_group_name = target.group_name
         self.target_group_pk = target.pk
         self.save()
-    
+
+
+class Game(models.Model):
+    #state of 0 is normal gamemode, state of 1 is groups
+    state = models.IntegerField(null=True, blank=True)
     
     
         

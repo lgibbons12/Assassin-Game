@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser, Player, Checker, AgentGroup
+from .models import CustomUser, Player, Checker, AgentGroup, Game
 from .game import GameManager
 from django.http import HttpResponse
 import csv
@@ -134,3 +134,4 @@ admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Player, PlayerAdmin)
 admin.site.register(Checker, CheckerAdmin)
 admin.site.register(AgentGroup, AgentGroupAdmin)
+admin.site.register(Game)

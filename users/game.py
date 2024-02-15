@@ -1,7 +1,7 @@
 import json
 import os
 import random
-from .models import Player, Checker, AgentGroup
+from .models import Player, Checker, AgentGroup, Game
 from django.db.models import F
 spy_callsigns = [
     "Ace",
@@ -274,6 +274,8 @@ spy_callsigns = [
 class GameManager:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     TARGETS_JSON_PATH = os.path.join(BASE_DIR, 'static', 'users', 'targets.json')
+    
+    
 
     @staticmethod
     def win_condition():
@@ -417,6 +419,11 @@ class GameManager:
            
     @staticmethod
     def assign_group_targets(new_game = True):
+        for obj in Game.objects.all():
+            obj.delete()
+        
+        new = Game(state = 1)
+        new.save()
         if new_game:
             Checker.objects.all().delete()
         
@@ -432,6 +439,7 @@ class GameManager:
 
                     # Save the changes
                     player_instance.save()
+
             for group_instance in AgentGroup.objects.all():
                 group_instance.is_out = False
                 group_instance.target_group_name = ''
@@ -471,6 +479,11 @@ class GameManager:
             group_to_set.save()
     @staticmethod
     def assign_targets(new_game = True):
+        for obj in Game.objects.all():
+            obj.delete()
+        
+        new = Game(state = 0)
+        new.save()
         for obj in AgentGroup.objects.all():
             obj.is_out = True
             obj.save()

@@ -1,0 +1,191 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Your Assignment</title>
+    <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
+    <style>
+        /* Define a common style for the decision buttons */
+    
+        /* Style for the div containing "I Was Eliminated" and "Target Eliminated" */
+        #normalActions {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            color: red;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            border: 5px solid red;
+        }
+    
+        /* Style for the div containing "I Was Discovered" */
+        #discoveredActions {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            color: lightblue;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            border: 5px solid lightblue;
+        }
+    
+        /* Style for the div containing self-defense actions */
+        #selfDefenseActions {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center; /* Center the buttons horizontally */
+            color: lightpink;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            border: 5px solid lightpink;
+        }
+    
+        /* Style for the buttons inside the divs */
+        #selfDefenseActions button,
+        #discoveredActions button,
+        #normalActions button {
+            margin: 0 10px; /* Adjust the spacing between buttons if needed */
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        {% if user.is_authenticated %}
+            <div class="content">
+                {% if state == 0 %}
+                    <h2>Welcome, Agent {{ user.player.agent_name }}</h2>
+                    <h5>Eliminate your target as quickly as possible. We are counting on you</h3>
+                    <p>Your target is: {{ user.player.target_name }}</p>
+                    
+                     <!-- Div for "I Was Eliminated" and "Target Eliminated" -->
+                <div id="normalActions">
+                    <p>Normal Elimination:</p>
+                    <br>
+                    <button class="decision" data-param="died" style="background-color: red;">I Was Eliminated</button>
+                    <button class="decision" data-param="killed" style="background-color: green;">I Eliminated My Target</button>
+                </div>
+
+                <!-- Div for "I Was Discovered" -->
+                <div id="discoveredActions">
+                    <p>Someone Witnessed You:</p>
+                    <button class="decision" data-param="discovered" style="background-color: blue;">I Was Discovered</button>
+                </div>
+
+                <!-- Div for self-defense actions -->
+                <div id="selfDefenseActions">
+                    <p>Self-Defense Elimination:</p>
+                    <button class="decision" data-param="selfDefenseKilled" style="background-color: blueviolet;">I Eliminated My Hunter in Self-Defense</button>
+                    <button class="decision" data-param="selfDefenseDied" style="background-color:coral;">I was Eliminated By My Target In Self-Defense</button>
+                </div>
+                <h2 id="notification"></h2>
+                {% elif state == 1 %}
+                    <p>You killed your target!</p>
+                    <p>Reload page to see your new target</p>
+                {% elif state == 2 %}
+                    <p>Sorry you died, wait till the next game!</p>
+                {% elif state == 3 %}
+                    <p>You won!!!!</p>
+                {% elif state == 4 %}
+                <p>Your group won!!!!</p>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>Sorry, you are not authenticated to see this page</p>
+        {% endif %}
+    </div>
+
+
+
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // Check if this cookie string begins with the name we want
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    
+        // Attach a click event listener to all buttons with the class 'decision'
+        document.querySelectorAll('.decision').forEach(function (button) {
+            button.addEventListener('click', function () {
+                // Extract the 'data-param' attribute value
+                var param = this.getAttribute('data-param');
+                var notification = document.getElementById('notification');
+                var actionMessage;
+
+// Determine the nature of the action for the confirmation message
+if (param === 'died') {
+    actionMessage = 'Are you sure you want to confirm that you were eliminated?';
+} else if (param === 'killed') {
+    actionMessage = 'Are you sure you want to confirm that you eliminated your target?';
+} else if (param === 'discovered') {
+    actionMessage = 'Are you sure you want to confirm that you were discovered?';
+} else if (param === "selfDefenseKilled") {
+    actionMessage = 'Are you sure you want to confirm you eliminated in self-defense?';
+} else if (param === "selfDefenseDied") {
+    actionMessage = 'Are you sure you want to confirm you were eliminated in self-defense?'
+} else {
+    actionMessage = 'Are you sure you want to proceed with this action?';
+}
+
+// Display confirmation dialog
+var confirmAction = confirm(actionMessage);
+                
+                if (confirmAction) {
+                    // Disable all decision buttons
+                    document.querySelectorAll('.decision').forEach(function (btn) {
+                        btn.disabled = true;
+                    })
+    
+                    // Use AJAX to send a request to a Django view with the parameter
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '{% url "users:handling" %}', true);
+    
+                    // Set up the request headers if needed
+                    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+                    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8'); // Add this line
+    
+                    // Define what happens on successful data submission
+                    xhr.onload = function () {
+                        if (xhr.status == 200) {
+                            console.log(xhr.responseText);
+                            // Handle the response from the server if needed
+    
+                            setTimeout(function () {
+                                window.location.href = '{% url "users:home" %}?param=' + param;
+                            }, 2000); // 2000 milliseconds = 2 seconds (duration of the animation)
+                        }
+                    }
+    
+                    // Send the request with the parameter
+                    xhr.send(JSON.stringify({ 'param': param, }));
+                }
+            });
+        });
+    </script>
+    <div class="navbar">
+        <a href="{% url 'users:home' %}">Home</a>
+        <a href="{% url 'users:rules' %}">Rules</a>
+        <a href="{% url 'users:complaints' %}">Feedback</a>
+        <a href="{% url 'users:logout' %}">Logout</a>
+    </div>
+    </body>
+    
+</html>

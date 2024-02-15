@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import logout
 from .game import GameManager
 from .stats import StatManager
-from .models import Checker, Player, AgentGroup
+from .models import Checker, Player, AgentGroup, Game
 import json
 from django.http import HttpResponse, JsonResponse
 # Create your views here.
@@ -25,71 +25,87 @@ def home(request):
     return render(request, "users/home.html", context)
 
 
+def assignment_direction(request):
+    #get all unconfirmed checkers
+    target_checkers = Checker.objects.filter(confirmations=2, action_performed=False)
+
+    # Function to handle checker logic
+    def handle_checker(checker):
+        result = checker.checking()
+        checker.action_performed = True
+        checker.save()
+        #checker.deletion()
+        return result
+
+    for checker in target_checkers:
+        handle_checker(checker)
+    
+    #change this if we implement new games
+    current_game = Game.objects.all()[0]
+
+    if current_game.state == 0:
+        return redirect("users:assignment")
+    elif current_game.state == 1:
+        return redirect("users:group_assignment")
+
+def group_assignment(request):
+    current = Player.objects.get(pk=request.user.player.pk)
+    state = -1
+    if AgentGroup.objects.filter(players=current)[0].is_out == False:
+            current_group = AgentGroup.objects.filter(players=current)[0]
+    else:
+        state = 1
+    
+    try:
+        target_group = AgentGroup.objects.get(pk=current_group.target_group_pk)
+    except AgentGroup.DoesNotExist:
+            return redirect("/?param=noassignment")
+        
+    if target_group.is_out:
+        GameManager.new_group_target(current_group, target_group)
+    
+    if state != 2:
+        if current.is_dead:
+            state = 2
+        elif GameManager.win_condition() != 0:
+            if current_group.is_winner:
+                state = 3
+        elif current.in_waiting:
+            return redirect(f'/?param=waiting')
+        else:
+            state = 0
+
+    #states
+    #-1 is null, 0 is normal, 1 is group died, 2 is you died, 3 is your group won
+        
+    context = {'state': state}
+    return render(request, "users/group_assignment.html", context)
 #view that shows the assignemtn
 def assignment(request):
-    group_game = False
+    
     current = Player.objects.get(pk=request.user.player.pk)
+    
+
+
+    
+    
     try:
-        if AgentGroup.objects.filter(players=current)[0].is_out == False:
-            current_group = AgentGroup.objects.filter(players=current)[0]
-            group_game = True
-    except:
-        pass
-
-
-    if group_game:
-        try:
-            target = AgentGroup.objects.get(pk=current_group.target_group_pk)
-        except AgentGroup.DoesNotExist:
-            return redirect("/?param=noassignment")
-        
-        if target.is_out:
-            GameManager.new_group_target(current_group, target)
-        
-        state = -1
-        #possible states
-        #your group is dead
-        #you are dead but your group is not
-        #you just killed someone
-
-
-        #states_logic
-        if current_group.is_out:
-            pass
-        return render(request, "users/group_assignment.html", context)
-        #break is here right now
-    if group_game == False:
-        try:
-            target = Player.objects.get(pk=current.target_pk)
-        except Player.DoesNotExist:
-            return redirect("/?param=noassignment")
-        if target.is_dead:
-            GameManager().new_target(request.user.player, target)
-        
-        user_pk = request.user.pk
-        state = -1
-        
-        #get all unconfirmed checkers
-        target_checkers = Checker.objects.filter(confirmations=2, action_performed=False)
-
-        # Function to handle checker logic
-        def handle_checker(checker):
-            result = checker.checking()
-            checker.action_performed = True
-            checker.save()
-            #checker.deletion()
-            return result
-
-        for checker in target_checkers:
-            handle_checker(checker)
+        target = Player.objects.get(pk=current.target_pk)
+    except Player.DoesNotExist:
+        return redirect("/?param=noassignment")
+    if target.is_dead:
+        GameManager().new_target(request.user.player, target)
     
+    user_pk = request.user.pk
+    state = -1
     
+   
+
+
     gm = GameManager()
     if gm.win_condition() != 0:
         if current.is_winner:
             state = 3
-        elif AgentGroup.objects.filter(players=current)[0].is_winner:
-            state = 4
         
     else:
         if current.is_dead:
