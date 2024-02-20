@@ -78,8 +78,12 @@ class Player(models.Model):
             checker_instance.save()
 
 
-    def kill_target(self):
-        targeting = Player.objects.filter(is_dead=False, is_playing=True, pk=self.target_pk).first()
+    def kill_target(self, who=None):
+        if who is not None:
+            targeting = Player.objects.get(pk=who)
+
+        else:
+            targeting = Player.objects.filter(is_dead=False, is_playing=True, pk=self.target_pk).first()
 
         # Check if a Checker with the target=targeting already exists
         existing_checker = Checker.objects.filter(target=targeting).first()

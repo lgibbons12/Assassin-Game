@@ -71,6 +71,39 @@
     flex-direction: column;
     margin: 0 10px; /* Adjust the spacing between buttons if needed */
 }
+
+/* Style for each player in the normal actions div */
+#normalActions .player-action {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px; /* Adjust the padding for better spacing */
+    margin: 10px;
+    border-radius: 10px;
+    border: 2px solid #ccc; /* You can adjust the border color */
+    flex-wrap: wrap;
+    color: #23C9FF;
+}
+
+/* Style for the buttons inside each player-action div */
+#normalActions .player-action button {
+    flex-direction: row;
+    margin: 5px 10px; /* Adjust the spacing between buttons if needed */
+}
+
+#normalActions {
+    display: flex;
+    flex-direction: row; /* Change to column to stack items vertically */
+    align-items: center;
+    color: red;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 10px;
+    border: 5px solid red;
+    max-width: 600px;
+    flex-wrap: wrap; /* Add this property to wrap items to the next line */
+}
     </style>
 </head>
 <body>
@@ -92,8 +125,8 @@
                     {% for player in t_group.players.all %}
                     <div class="player-action">
                         <p>{{ player.user.first_name }}</p>
-                        <button class="decision" data-param="killed" style="background-color: red;">I Eliminated Them</button>
-                        <button class="decision" data-param="selfDefenseDied" style="background-color: coral;">They Eliminated Me in Self-Defense</button>
+                        <button class="decision" who="{{ player.pk }}" data-param="killed" style="background-color: green;">I Eliminated Them</button>
+                        <button class="decision" who="{{ player.pk }}" data-param="selfDefenseDied" style="background-color: coral;">They Eliminated Me in Self-Defense</button>
                     <br>
                     <br>
                     <br>
@@ -106,7 +139,11 @@
                     <p>Someone Witnessed You:</p>
                     <button class="decision" data-param="discovered" style="background-color: blue;">I Was Discovered</button>
                 </div>
-
+                {% if pwk is not None %}
+                    <div id="selfDefenseActions">
+                        <button class="decision" data-param="died" style="background-color: red;">I Was Eliminated by {{ pwk.killer.user.first_name }}</button>
+                    </div>
+                {% endif %}
                 <!-- Div for self-defense actions -->
                 <div id="selfDefenseActions">
                     <p>Self-Defense Elimination:</p>
@@ -151,6 +188,8 @@
             button.addEventListener('click', function () {
                 // Extract the 'data-param' attribute value
                 var param = this.getAttribute('data-param');
+
+                
                 var notification = document.getElementById('notification');
                 var actionMessage;
 
@@ -180,7 +219,7 @@ var confirmAction = confirm(actionMessage);
     
                     // Use AJAX to send a request to a Django view with the parameter
                     var xhr = new XMLHttpRequest();
-                    xhr.open('POST', '{% url "users:handling" %}', true);
+                    xhr.open('POST', '{% url "users:group_handling" %}', true);
     
                     // Set up the request headers if needed
                     xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
@@ -197,9 +236,14 @@ var confirmAction = confirm(actionMessage);
                             }, 2000); // 2000 milliseconds = 2 seconds (duration of the animation)
                         }
                     }
-    
-                    // Send the request with the parameter
-                    xhr.send(JSON.stringify({ 'param': param, }));
+                    if (param === "killed" || param === "selfDefenseDied") {
+                        var who_pk = this.getAttribute('who');
+                        xhr.send(JSON.stringify({ 'param': param, 'who_pk': who_pk}));
+                    } else {
+                        // Send the request with the parameter
+                        xhr.send(JSON.stringify({ 'param': param, }));
+                    }
+                    
                 }
             });
         });

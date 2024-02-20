@@ -77,10 +77,18 @@ def group_assignment(request):
         else:
             state = 0
 
+
+    #see if we need tro display extra info
+    player_was_killed = Checker.objects.filter(confirmations__lt=2, action_performed=False, target=current).first()
+    
+    
+    player_killed_sd = Checker.objects.filter(confirmations__lt=2, action_performed=False, killer=current).first()
+
+    
     #states
     #-1 is null, 0 is normal, 1 is group died, 2 is you died, 3 is your group won
     target_group = AgentGroup.objects.get(pk=current_group.target_group_pk)
-    context = {'state': state, 'team': current_group, 't_group': target_group}
+    context = {'state': state, 'team': current_group, 't_group': target_group, 'pwk': player_was_killed, 'pksd': player_killed_sd}
     return render(request, "users/group_assignment.html", context)
 #view that shows the assignemtn
 def assignment(request):
@@ -145,6 +153,41 @@ def handling(request):
         
         elif param == "killed":
             user.player.kill_target()
+        
+        elif param == "discovered":
+            user.player.discovered()
+        
+        elif param == "selfDefenseKilled":
+            user.player.self_defense_killed()
+        
+        elif param == "selfDefenseDied":
+            user.player.self_defense_died()
+        else:
+            raise ValueError("wrong param")
+        
+        user.player.in_waiting = True
+        print(f"{user.name} is in waiting anymore")
+        user.player.save()
+        
+        return HttpResponse('POST request processed succussfully')
+    else:
+        return JsonResponse({'error', 'Invalid request method'})
+
+
+def group_handling(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        param = data.get('param', None)
+        who_pk = data.get('who_pk', None)
+
+
+        user = request.user
+
+        if param == "died":
+            user.player.get_killed()
+        
+        elif param == "killed":
+            user.player.kill_target(who = who_pk)
         
         elif param == "discovered":
             user.player.discovered()
