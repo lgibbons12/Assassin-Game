@@ -447,6 +447,8 @@ class GameManager:
                 group_instance.kills = 0
                 group_instance.is_winner = False
 
+                group_instance.save()
+
         else:
             for player_instance in Player.objects.filter(is_playing=True, is_dead=False):
                 player_instance.target_name = ''
@@ -459,6 +461,8 @@ class GameManager:
             for group_instance in AgentGroup.objects.filter(is_playing = True, is_out = False):
                 group_instance.target_group_name = ''
                 group_instance.target_group_pk = None
+
+                group_instance.save()
                 
 
         available_targets = list(AgentGroup.objects.filter(is_playing=True, is_out = False).values_list('id', flat=True))

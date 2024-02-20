@@ -50,6 +50,7 @@ def assignment_direction(request):
 
 def group_assignment(request):
     current = Player.objects.get(pk=request.user.player.pk)
+    current_group = AgentGroup.objects.filter(players=current)[0]
     state = -1
     if AgentGroup.objects.filter(players=current)[0].is_out == False:
             current_group = AgentGroup.objects.filter(players=current)[0]
@@ -60,6 +61,7 @@ def group_assignment(request):
         target_group = AgentGroup.objects.get(pk=current_group.target_group_pk)
     except AgentGroup.DoesNotExist:
             return redirect("/?param=noassignment")
+    
         
     if target_group.is_out:
         GameManager.new_group_target(current_group, target_group)
@@ -77,8 +79,8 @@ def group_assignment(request):
 
     #states
     #-1 is null, 0 is normal, 1 is group died, 2 is you died, 3 is your group won
-        
-    context = {'state': state}
+    target_group = AgentGroup.objects.get(pk=current_group.target_group_pk)
+    context = {'state': state, 'team': current_group, 't_group': target_group}
     return render(request, "users/group_assignment.html", context)
 #view that shows the assignemtn
 def assignment(request):

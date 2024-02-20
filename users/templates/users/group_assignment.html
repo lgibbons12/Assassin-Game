@@ -20,6 +20,7 @@
             margin: 20px;
             border-radius: 10px;
             border: 5px solid red;
+            max-width: 600px;
         }
     
         /* Style for the div containing "I Was Discovered" */
@@ -54,6 +55,22 @@
             margin: 0 10px; /* Adjust the spacing between buttons if needed */
             flex-direction: column;
         }
+        .player-action {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between; /* Spread the content horizontally */
+    padding: 20px;
+    margin: 20px;
+    border-radius: 10px;
+    border: 5px solid #ccc; /* You can adjust the border color */
+}
+
+/* Style for the buttons inside the player-action div */
+.player-action button {
+    flex-direction: column;
+    margin: 0 10px; /* Adjust the spacing between buttons if needed */
+}
     </style>
 </head>
 <body>
@@ -62,16 +79,26 @@
         {% if user.is_authenticated %}
             <div class="content">
                 {% if state == 0 %}
-                    <h2>Welcome, Agent {{ user.player.agent_name }}</h2>
-                    <h5>Eliminate your target as quickly as possible. We are counting on you</h3>
-                    <p>Your target is: {{ user.player.target_name }}</p>
+                    <h2>Welcome, {{user.first_name}}, you are on Team {{ team.group_name }}</h2>
+                    <h5>Eliminate your target team as quickly as possible. We are counting on you</h3>
+                    
+                    <p>Your target is: Team {{ team.target_group_name }}</p>
                     
                      <!-- Div for "I Was Eliminated" and "Target Eliminated" -->
+                
                 <div id="normalActions">
                     <p>Normal Elimination:</p>
                     <br>
-                    <button class="decision" data-param="died" style="background-color: red;">I Was Eliminated</button>
-                    <button class="decision" data-param="killed" style="background-color: green;">I Eliminated My Target</button>
+                    {% for player in t_group.players.all %}
+                    <div class="player-action">
+                        <p>{{ player.user.first_name }}</p>
+                        <button class="decision" data-param="killed" style="background-color: red;">I Eliminated Them</button>
+                        <button class="decision" data-param="selfDefenseDied" style="background-color: coral;">They Eliminated Me in Self-Defense</button>
+                    <br>
+                    <br>
+                    <br>
+                    </div>
+                    {% endfor %}
                 </div>
 
                 <!-- Div for "I Was Discovered" -->
@@ -88,14 +115,11 @@
                 </div>
                 <h2 id="notification"></h2>
                 {% elif state == 1 %}
-                    <p>You killed your target!</p>
-                    <p>Reload page to see your new target</p>
+                    <p>Your group died, wait till next round!</p>
                 {% elif state == 2 %}
                     <p>Sorry you died, wait till the next game!</p>
                 {% elif state == 3 %}
-                    <p>You won!!!!</p>
-                {% elif state == 4 %}
-                <p>Your group won!!!!</p>
+                    <p>Your group won!!!!</p>
                 {% endif %}
             </div>
         {% else %}
