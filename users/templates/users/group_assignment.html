@@ -144,12 +144,12 @@
                         <button class="decision" data-param="died" style="background-color: red;">I Was Eliminated by {{ pwk.killer.user.first_name }}</button>
                     </div>
                 {% endif %}
-                <!-- Div for self-defense actions -->
-                <div id="selfDefenseActions">
-                    <p>Self-Defense Elimination:</p>
-                    <button class="decision" data-param="selfDefenseKilled" style="background-color: blueviolet;">I Eliminated My Hunter in Self-Defense</button>
-                    <button class="decision" data-param="selfDefenseDied" style="background-color:coral;">I was Eliminated By My Target In Self-Defense</button>
-                </div>
+                {% if pksd is not None %}
+                    <div id="selfDefenseActions">
+                        <button class="decision" data-param="selfDefenseKilled" style="background-color: blueviolet;">I Eliminated {{ pksd.target.user.first_name }} in Self-Defense</button>
+                    </div>
+                {% endif %}
+                
                 <h2 id="notification"></h2>
                 {% elif state == 1 %}
                     <p>Your group died, wait till next round!</p>
