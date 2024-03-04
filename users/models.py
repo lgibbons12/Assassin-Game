@@ -48,6 +48,8 @@ class Player(models.Model):
             GameManager()._refresh_targets()
         # Check if a Checker with target=targeting and self_defense=True already exists
         existing_checker = Checker.objects.filter(target=targeting, self_defense=True).first()
+        if not existing_checker:
+            existing_checker = Checker.objects.filter(killer=self, self_defense=True).first()
 
         if existing_checker:
             # If the Checker already exists, update the killer and confirmations
@@ -63,7 +65,7 @@ class Player(models.Model):
         # Additional actions or save the player if needed
        
     
-    def self_defense_died(self):
+    def self_defense_died(self, who):
         # Check if a Checker with target=self and self_defense=True already exists
         existing_checker = Checker.objects.filter(target=self, self_defense=True).first()
 
@@ -73,7 +75,7 @@ class Player(models.Model):
             existing_checker.save()
         else:
             # If the Checker doesn't exist, create a new one with the target confirmed
-            checker_instance = Checker.objects.create(target=self, self_defense=True)
+            checker_instance = Checker.objects.create(target=self, killer = Player.objects.get(pk=who), self_defense=True)
             checker_instance.target_confirm()
             checker_instance.save()
 
@@ -134,6 +136,33 @@ class Checker(models.Model):
 
     def checking(self):
         from .game import GameManager
+
+        if GameManager.is_group_game():
+            gm = GameManager()
+            if gm.win_condition():
+                return False
+            
+            killer_group = AgentGroup.objects.filter(players=self.killer)[0]
+            died_group = AgentGroup.objects.filter(players=self.target)[0]
+            self.target.is_dead = True
+            self.target.in_waiting = False
+            self.target.save()
+
+            killer_group.kills += 1
+            killer_group.save()
+            
+            self.killer.have_eliminated_today = True
+            self.killer.in_waiting = False
+            self.killer.save()
+
+            self.action_performed = True
+
+            if all(player.is_dead for player in died_group.players.all()) and self.self_defense == False:
+                died_group.is_out = True
+                died_group.save()
+                gm.new_group_target(group=killer_group, group_killed=died_group)
+            self.save()
+            
         if self.self_defense and self.confirmations == 2 and self.action_performed == False:
             gm = GameManager()
             if gm.win_condition():

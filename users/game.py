@@ -275,7 +275,9 @@ class GameManager:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     TARGETS_JSON_PATH = os.path.join(BASE_DIR, 'static', 'users', 'targets.json')
     
-    
+    @staticmethod
+    def is_group_game():
+        return Game.objects.all()[0].state == 1
 
     @staticmethod
     def win_condition():
@@ -358,6 +360,8 @@ class GameManager:
 
     @staticmethod
     def _refresh_targets():
+        if GameManager.is_group_game:
+            return
          # Get all alive players
         alive_players = Player.objects.filter(is_playing=True, is_dead=False)
 

@@ -196,7 +196,7 @@ def group_handling(request):
             user.player.self_defense_killed()
         
         elif param == "selfDefenseDied":
-            user.player.self_defense_died()
+            user.player.self_defense_died(who=who_pk)
         else:
             raise ValueError("wrong param")
         

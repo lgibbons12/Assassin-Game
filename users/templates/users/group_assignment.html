@@ -118,7 +118,16 @@
                     <p>Your target is: Team {{ team.target_group_name }}</p>
                     
                      <!-- Div for "I Was Eliminated" and "Target Eliminated" -->
-                
+                     {% if pwk is not None %}
+                     <div id="selfDefenseActions">
+                         <button class="decision" data-param="died" style="background-color: red;">I Was Eliminated by {{ pwk.killer.user.first_name }}</button>
+                     </div>
+                 {% endif %}
+                 {% if pksd is not None %}
+                     <div id="selfDefenseActions">
+                         <button class="decision" data-param="selfDefenseKilled" style="background-color: blueviolet;">I Eliminated {{ pksd.target.user.first_name }} in Self-Defense</button>
+                     </div>
+                 {% endif %}
                 <div id="normalActions">
                     <p>Normal Elimination:</p>
                     <br>
@@ -139,16 +148,7 @@
                     <p>Someone Witnessed You:</p>
                     <button class="decision" data-param="discovered" style="background-color: blue;">I Was Discovered</button>
                 </div>
-                {% if pwk is not None %}
-                    <div id="selfDefenseActions">
-                        <button class="decision" data-param="died" style="background-color: red;">I Was Eliminated by {{ pwk.killer.user.first_name }}</button>
-                    </div>
-                {% endif %}
-                {% if pksd is not None %}
-                    <div id="selfDefenseActions">
-                        <button class="decision" data-param="selfDefenseKilled" style="background-color: blueviolet;">I Eliminated {{ pksd.target.user.first_name }} in Self-Defense</button>
-                    </div>
-                {% endif %}
+               
                 
                 <h2 id="notification"></h2>
                 {% elif state == 1 %}
