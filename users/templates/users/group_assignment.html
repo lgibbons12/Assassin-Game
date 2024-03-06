@@ -128,10 +128,32 @@
                          <button class="decision" data-param="selfDefenseKilled" style="background-color: blueviolet;">I Eliminated {{ pksd.target.user.first_name }} in Self-Defense</button>
                      </div>
                  {% endif %}
+                <div id="selfDefenseActions">
+                    <p>Your Team:</p>
+                    <ul>
+                    {% for player in team.players.all %}
+                    {% if player.is_dead %}
+                    
+                        <li></li>>
+                    
+                    {% else %}
+                    <div class="player-action">
+                        <h3>{{ player.user.first_name }}</h3>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    </ul>
+                </div>
                 <div id="normalActions">
                     <p>Normal Elimination:</p>
                     <br>
                     {% for player in t_group.players.all %}
+                    {% if player.is_dead %}
+                    <div class="player-action">
+                        <p><strike>{{ player.user.first_name }}</strike></p>
+                        <br><br><br>
+                    </div>
+                    {% else %}
                     <div class="player-action">
                         <p>{{ player.user.first_name }}</p>
                         <button class="decision" who="{{ player.pk }}" data-param="killed" style="background-color: green;">I Eliminated Them</button>
@@ -140,6 +162,7 @@
                     <br>
                     <br>
                     </div>
+                    {% endif %}
                     {% endfor %}
                 </div>
 
