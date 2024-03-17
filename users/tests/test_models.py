@@ -1,5 +1,5 @@
 from django.test import TestCase
-from users.models import CustomUser, Player, Checker
+from users.models import CustomUser, Player, Checker, Game
 from django.contrib.auth import get_user_model
 from users.game import GameManager
 
@@ -56,6 +56,7 @@ class PlayerModelTestCase(TestCase):
         checker1 = Checker.objects.create(target=player1)
         checker2 = Checker.objects.create(target=player2, killer=player1, target_confirmed=True, killer_confirmed=True, confirmations = 2)
 
+        game = Game.objects.create(state = 0)
         # Call the checking method
         gm = GameManager()  # You might need to adjust this if GameManager needs initialization
         result = checker2.checking()

@@ -134,12 +134,12 @@
                     {% for player in team.players.all %}
                     {% if player.is_dead %}
                     
-                        <li></li>>
+                        <li>{{ player.user.first_name }}: <strong>Dead</strong></li>
                     
                     {% else %}
-                    <div class="player-action">
-                        <h3>{{ player.user.first_name }}</h3>
-                    </div>
+                    
+                        <li>{{ player.user.first_name }}: <strong>Alive</strong></li>
+                    
                     {% endif %}
                     {% endfor %}
                     </ul>
