@@ -5,17 +5,22 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rules</title>
+    <title>Group Placement</title>
     <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
 </head>
 <body>
     <div class="container">
         <div class="content">
-            <h2>The Rules of the Game</h2>
-            <ul>
-                <li>Rule 1: ///</li>
-                <li>Rule 2: ///</li>
-            </ul>
+            {% if is_placed %}
+                <h2>Your Group is: {{ group.group_name }}</h2>
+                <p>Teammates: </p>
+                {% for player in group.players.all %}
+                    <p>{{ player.user.first_name }}</p>
+                {% endfor %}
+            {% else %}
+                <h2>Group Placement</h2>
+                <p>Please type in your teammate's names and click submit when you have your group!</p>
+            {% endif %}
         </div>
     </div>
     <div class="navbar">

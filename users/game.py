@@ -278,6 +278,12 @@ class GameManager:
     @staticmethod
     def is_group_game():
         return Game.objects.all()[0].state == 1
+    
+    @staticmethod
+    def is_placing_groups():
+        if Game.objects.all() == None or len(Game.objects.all()) == 0:
+            return False
+        return Game.objects.all()[0].placing_groups == True
 
     @staticmethod
     def win_condition():

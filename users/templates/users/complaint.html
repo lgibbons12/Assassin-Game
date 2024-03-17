@@ -21,6 +21,9 @@
     <div class="navbar">
         <a href="{% url 'users:home' %}">Home</a>
         <a href="{% url 'users:rules' %}">Rules</a>
+        {% if ggame %}
+            <a href="{% url 'users:placement' %}">Placement</a>
+        {% endif %}
         <a href="{% url 'users:complaints' %}">Feedback</a>
         <a href="{% url 'users:logout' %}">Logout</a>
     </div>

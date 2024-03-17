@@ -117,7 +117,7 @@ class CheckerAdmin(admin.ModelAdmin):
 
 
 class AgentGroupAdmin(admin.ModelAdmin):
-    actions = ['assignGroupTargets']
+    actions = ['assignGroupTargets', 'replace_groups']
     list_display = ['group_name', 'get_players', 'is_out', 'is_playing']
 
     def get_players(self, obj):
@@ -127,8 +127,19 @@ class AgentGroupAdmin(admin.ModelAdmin):
 
     def assignGroupTargets(self, request, queryset):
         GameManager().assign_group_targets()
+    
+    def replace_groups(self, request, queryset):
+        for obj in AgentGroup.objects.all():
+            obj.players.all().delete()
+            obj.save()
+        
+        if GameManager.is_placing_groups == False:
+            Game.objects.all().delete()
+            Game(state=1, placing_groups=True).save()
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active']
+
+
 
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Player, PlayerAdmin)

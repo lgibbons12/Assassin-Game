@@ -228,6 +228,8 @@ class AgentGroup(models.Model):
 class Game(models.Model):
     #state of 0 is normal gamemode, state of 1 is groups
     state = models.IntegerField(null=True, blank=True)
+
+    placing_groups = models.BooleanField(default=False)
     
     
         

@@ -5,6 +5,8 @@ from .stats import StatManager
 from .models import Checker, Player, AgentGroup, Game
 import json
 from django.http import HttpResponse, JsonResponse
+
+
 # Create your views here.
 def home(request):
     param_value = request.GET.get('param')
@@ -21,7 +23,7 @@ def home(request):
     
     
     context = {'param': param_value, 'kill_leaders': StatManager().get_kill_rankings(),
-               'players_alive': StatManager().get_alive_players_count(), 'winner': winner}
+               'players_alive': StatManager().get_alive_players_count(), 'winner': winner, 'ggame': GameManager.is_placing_groups()}
     return render(request, "users/home.html", context)
 
 
@@ -88,17 +90,15 @@ def group_assignment(request):
     #states
     #-1 is null, 0 is normal, 1 is group died, 2 is you died, 3 is your group won
     target_group = AgentGroup.objects.get(pk=current_group.target_group_pk)
-    context = {'state': state, 'team': current_group, 't_group': target_group, 'pwk': player_was_killed, 'pksd': player_killed_sd}
+    context = {'state': state, 'team': current_group, 't_group': target_group, 'pwk': player_was_killed, 'pksd': player_killed_sd, 'ggame': GameManager.is_placing_groups()}
     return render(request, "users/group_assignment.html", context)
+
 #view that shows the assignemtn
 def assignment(request):
     
     current = Player.objects.get(pk=request.user.player.pk)
     
 
-
-    
-    
     try:
         target = Player.objects.get(pk=current.target_pk)
     except Player.DoesNotExist:
@@ -129,16 +129,38 @@ def assignment(request):
     context = {'state': state}
     return render(request, "users/assignment.html", context)
 
+
+
+#page for group placement
+def placement(request):
+    is_placed = True
+    current = request.user.player
+
+    current_group = AgentGroup.objects.filter(players=current)
+   
+    if current_group == None or len(current_group) == 0:
+        is_placed = False
+    
+
+    
+    context = {'is_placed': is_placed, 'group': current_group[0], 'ggame': GameManager.is_placing_groups()}
+    return render(request, "users/placement.html", context)
+
+
+
+
 def logout_view(request):
     logout(request)
     return redirect("/")
 
 
 def submit_complaint(request):
-    return render(request, "users/complaint.html")
+    context = {'ggame': GameManager.is_placing_groups()}
+    return render(request, "users/complaint.html", context)
 
 def rules(request):
-    return render(request, "users/rules.html")
+    context = {'ggame': GameManager.is_placing_groups()}
+    return render(request, "users/rules.html", context)
 
 def handling(request):
     #make it users.player
