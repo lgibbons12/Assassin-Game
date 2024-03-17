@@ -177,7 +177,43 @@
                 {% elif state == 1 %}
                     <p>Your group died, wait till next round!</p>
                 {% elif state == 2 %}
-                    <p>Sorry you died, wait till the next game!</p>
+                <h2>Welcome, {{user.first_name}}, you are on Team {{ team.group_name }}</h2>
+                    <h5>Sorry to say, you are eliminated</h3>
+                    
+                    <p>Your team's target is: Team {{ team.target_group_name }}</p>
+                
+                    <div id="selfDefenseActions">
+                <h2>Your Team's Status: </h2>
+                {% for player in team.players.all %}
+                    {% if player.is_dead %}
+                    
+                        <li>{{ player.user.first_name }}: <strong>Dead</strong></li>
+                    
+                    {% else %}
+                    
+                        <li>{{ player.user.first_name }}: <strong>Alive</strong></li>
+                    
+                    {% endif %}
+                    {% endfor %}
+                    </div>
+
+                    <div id="normalActions">
+                        <p>Normal Elimination:</p>
+                        <br>
+                        {% for player in t_group.players.all %}
+                        {% if player.is_dead %}
+                        <div class="player-action">
+                            <p><strike>{{ player.user.first_name }}</strike></p>
+                            <br><br><br>
+                        </div>
+                        {% else %}
+                        <div class="player-action">
+                            <p>{{ player.user.first_name }}</p>
+                            
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
                 {% elif state == 3 %}
                     <p>Your group won!!!!</p>
                 {% endif %}

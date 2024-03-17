@@ -1,3 +1,4 @@
+#imports
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout
 from .game import GameManager
@@ -9,7 +10,10 @@ from django.http import HttpResponse, JsonResponse
 
 # Create your views here.
 def home(request):
+    #get the parameter value to know what waiting message to show after actions
     param_value = request.GET.get('param')
+
+    #winner to check if there is a winner
     winners = StatManager.get_winner()
     match winners[0]:
         case 0:
@@ -22,11 +26,14 @@ def home(request):
             winner = None
     
     
+    #grab info to display in home.html
     context = {'param': param_value, 'kill_leaders': StatManager().get_kill_rankings(),
                'players_alive': StatManager().get_alive_players_count(), 'winner': winner, 'ggame': GameManager.is_placing_groups()}
     return render(request, "users/home.html", context)
 
-
+#takes in the get assignment button
+#handles checking for kills
+#directs users to group or individual pages based on the game being played
 def assignment_direction(request):
     #get all unconfirmed checkers
     target_checkers = Checker.objects.filter(confirmations=2, action_performed=False)
@@ -51,9 +58,12 @@ def assignment_direction(request):
         return redirect("users:group_assignment")
 
 def group_assignment(request):
+    #assignment for the groups
     current = Player.objects.get(pk=request.user.player.pk)
     current_group = AgentGroup.objects.filter(players=current)[0]
     state = -1
+
+    #if our group is not out call the group, otherwise state is 1 for them dead
     if AgentGroup.objects.filter(players=current)[0].is_out == False:
             current_group = AgentGroup.objects.filter(players=current)[0]
     else:
@@ -64,9 +74,10 @@ def group_assignment(request):
     except AgentGroup.DoesNotExist:
             return redirect("/?param=noassignment")
     
-        
+    #get new target group if users is out
     if target_group.is_out:
         GameManager.new_group_target(current_group, target_group)
+    
     
     if state != 2:
         if current.is_dead:

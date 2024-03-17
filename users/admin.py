@@ -130,7 +130,7 @@ class AgentGroupAdmin(admin.ModelAdmin):
     
     def replace_groups(self, request, queryset):
         for obj in AgentGroup.objects.all():
-            
+            #find some way to reset the many too many in the agent groups admin
             obj.save()
         
         if GameManager.is_placing_groups == False:
