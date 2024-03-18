@@ -6,7 +6,7 @@ from .stats import StatManager
 from .models import Checker, Player, AgentGroup, Game
 import json
 from django.http import HttpResponse, JsonResponse
-
+from django.urls import reverse
 
 # Create your views here.
 def home(request):
@@ -60,7 +60,11 @@ def assignment_direction(request):
 def group_assignment(request):
     #assignment for the groups
     current = Player.objects.get(pk=request.user.player.pk)
-    current_group = AgentGroup.objects.filter(players=current)[0]
+
+    try:
+        current_group = AgentGroup.objects.filter(players=current)[0]
+    except:
+        return redirect(reverse('users:home'))
     state = -1
 
     #if our group is not out call the group, otherwise state is 1 for them dead
@@ -102,7 +106,15 @@ def group_assignment(request):
     #-1 is null, 0 is normal, 1 is group died, 2 is you died, 3 is your group won
     target_group = AgentGroup.objects.get(pk=current_group.target_group_pk)
     context = {'state': state, 'team': current_group, 't_group': target_group, 'pwk': player_was_killed, 'pksd': player_killed_sd, 'ggame': GameManager.is_placing_groups()}
-    return render(request, "users/group_assignment.html", context)
+    
+    try:
+        return render(request, "users/assignment.html", context)
+    except IndexError:
+        return redirect(reverse('users:home'))
+    except Exception as e:
+    # Handle other exceptions
+        return render(request, "error_template.html", {"error_message": str(e)})
+    
 
 #view that shows the assignemtn
 def assignment(request):
@@ -138,7 +150,13 @@ def assignment(request):
             state = 0
 
     context = {'state': state}
-    return render(request, "users/assignment.html", context)
+    try:
+        return render(request, "users/assignment.html", context)
+    except IndexError:
+        return redirect(reverse('users:home'))
+    except Exception as e:
+    # Handle other exceptions
+        return render(request, "error_template.html", {"error_message": str(e)})
 
 
 
@@ -151,10 +169,13 @@ def placement(request):
    
     if current_group == None or len(current_group) == 0:
         is_placed = False
+        c_group = None
+    else:
+        c_group = current_group[0]
     
 
     
-    context = {'is_placed': is_placed, 'group': current_group[0], 'ggame': GameManager.is_placing_groups()}
+    context = {'is_placed': is_placed, 'group': c_group, 'ggame': GameManager.is_placing_groups()}
     return render(request, "users/placement.html", context)
 
 

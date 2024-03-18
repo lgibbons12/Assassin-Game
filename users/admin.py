@@ -130,12 +130,14 @@ class AgentGroupAdmin(admin.ModelAdmin):
     
     def replace_groups(self, request, queryset):
         for obj in AgentGroup.objects.all():
-            #find some way to reset the many too many in the agent groups admin
+            obj.players.clear()
             obj.save()
         
-        if GameManager.is_placing_groups == False:
-            Game.objects.all().delete()
-            Game(state=1, placing_groups=True).save()
+        
+        Game.objects.all().delete()
+        Game(state=1, placing_groups=True).save()
+    
+    
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active']
 

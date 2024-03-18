@@ -184,6 +184,7 @@
                 
                     <div id="selfDefenseActions">
                 <h2>Your Team's Status: </h2>
+                <ul>
                 {% for player in team.players.all %}
                     {% if player.is_dead %}
                     
@@ -195,6 +196,7 @@
                     
                     {% endif %}
                     {% endfor %}
+                </ul>
                     </div>
 
                     <div id="normalActions">
