@@ -37,3 +37,18 @@ If Time:
 -- 
 
 \*********/
+
+
+It is going to be a filter
+
+So first time it shows up if you aren't on a team it gives you an option to make a name and create one
+
+once you have created a team, it shows team name and current players on top
+
+you can scroll or search for specific players divs which will have a button with their pk that says add
+
+if add it will go to an add view that will then add thatr player to the team and reload the page
+
+There will also be an x next to each players name on the team selection that will send to a subtract view that will take that polayer off of the team
+
+https://www.youtube.com/watch?v=VL5ZNCjXEbw

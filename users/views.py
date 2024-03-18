@@ -8,6 +8,8 @@ import json
 from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 
+from django.views.generic import ListView
+
 # Create your views here.
 def home(request):
     #get the parameter value to know what waiting message to show after actions
@@ -162,6 +164,7 @@ def assignment(request):
 
 #page for group placement
 def placement(request):
+    
     is_placed = True
     current = request.user.player
 
@@ -177,6 +180,8 @@ def placement(request):
     
     context = {'is_placed': is_placed, 'group': c_group, 'ggame': GameManager.is_placing_groups()}
     return render(request, "users/placement.html", context)
+
+
 
 
 

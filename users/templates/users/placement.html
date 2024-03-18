@@ -21,6 +21,14 @@
                 <h2>Group Placement</h2>
                 <p>Please type in your teammate's names and click submit when you have your group!</p>
             {% endif %}
+
+            <div class="container text-white">
+                <form action="{% url 'placement' %}" method="get">
+                    {% csrf_token %}
+                    <input type="text" name="q" placeholder="Name">
+                    <button type="submit" name="button">Search</button>
+                </form>
+            </div>
         </div>
     </div>
     <div class="navbar">
