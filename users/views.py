@@ -176,9 +176,9 @@ def placement(request):
     else:
         c_group = current_group[0]
     
-
+    all_players = Player.objects.all()
     
-    context = {'is_placed': is_placed, 'group': c_group, 'ggame': GameManager.is_placing_groups()}
+    context = {'is_placed': is_placed, 'group': c_group, 'ggame': GameManager.is_placing_groups(), 'players': all_players}
     return render(request, "users/placement.html", context)
 
 

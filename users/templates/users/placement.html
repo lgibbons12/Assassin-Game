@@ -23,12 +23,82 @@
             {% endif %}
 
             <div class="container text-white">
-                <form action="{% url 'placement' %}" method="get">
+                <form action="{% url 'users:placement' %}" method="get">
                     {% csrf_token %}
                     <input type="text" name="q" placeholder="Name">
                     <button type="submit" name="button">Search</button>
                 </form>
             </div>
+            <div id="players-container" style="padding: 20px;">
+                <h1>Players to pick from</h1>
+                <div id="player-list">
+                    {% for player in players %}
+                    <div class="player-item">
+                        <p>{{ player.user.first_name }} {{ player.user.last_name }}</p>
+                        <button class="add-btn">Add</button>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div id="navigation">
+                    <button id="prev-btn">&lt; Prev</button>
+                    <button id="next-btn">Next &gt;</button>
+                </div>
+            </div>
+            
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    var players = document.querySelectorAll('.player-item');
+                    var prevBtn = document.getElementById('prev-btn');
+                    var nextBtn = document.getElementById('next-btn');
+                    var currentIndex = 0;
+                    var maxIndex = Math.max(Math.ceil(players.length / 5) - 1, 0);
+            
+                    function showPlayers() {
+                        for (var i = 0; i < players.length; i++) {
+                            if (i >= currentIndex * 5 && i < (currentIndex + 1) * 5) {
+                                players[i].style.display = 'block';
+                            } else {
+                                players[i].style.display = 'none';
+                            }
+                        }
+            
+                        if (maxIndex <= 0) {
+                            prevBtn.style.display = 'none';
+                            nextBtn.style.display = 'none';
+                        } else {
+                            if (currentIndex === 0) {
+                                prevBtn.style.display = 'none';
+                            } else {
+                                prevBtn.style.display = 'block';
+                            }
+            
+                            if (currentIndex >= maxIndex) {
+                                nextBtn.style.display = 'none';
+                            } else {
+                                nextBtn.style.display = 'block';
+                            }
+                        }
+                    }
+            
+                    showPlayers();
+            
+                    prevBtn.addEventListener('click', function() {
+                        if (currentIndex > 0) {
+                            currentIndex--;
+                            showPlayers();
+                        }
+                    });
+            
+                    nextBtn.addEventListener('click', function() {
+                        if (currentIndex < maxIndex) {
+                            currentIndex++;
+                            showPlayers();
+                        }
+                    });
+                });
+            </script>
+            
+            
         </div>
     </div>
     <div class="navbar">

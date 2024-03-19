@@ -4,7 +4,7 @@ from .game import GameManager
 from django.http import HttpResponse
 import csv
 import tempfile
-
+from django.contrib.auth import get_user_model
 def save_info(queryset):
     # Define the response as a CSV file
         response = HttpResponse(content_type='text/csv')
@@ -28,7 +28,7 @@ def save_info(queryset):
         return response
 class PlayerAdmin(admin.ModelAdmin):
     actions = ['assign_targets', 'save_info','discovered', 'killed_target', 'shuffle',
-               'all_have_not_eliminated_today']
+               'all_have_not_eliminated_today', 'add_players']
     list_display = ['pk', 'is_dead', 'kills', 'is_playing', 'in_waiting']
     list_filter = ['is_dead', 'in_waiting', 'have_eliminated_today', 'is_playing']
     search_fields = ['target_name']
@@ -41,6 +41,15 @@ class PlayerAdmin(admin.ModelAdmin):
         for obj in Player.objects.filter(is_playing=True, is_dead=False):
             obj.have_eliminated_today = False
             obj.save()
+
+    def add_players(self, request, queryset):
+        for i in range(20):
+            user2 = get_user_model().objects.create_user(
+            username=f'testuser{i}',
+            password='testpassword',
+            first_name=f'Jane{i}',
+            last_name='Doe'
+            )
 
     def shuffle(self, request, queryset):
         #response = save_info(queryset)  # Call save_info and store the response

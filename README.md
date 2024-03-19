@@ -52,3 +52,6 @@ if add it will go to an add view that will then add thatr player to the team and
 There will also be an x next to each players name on the team selection that will send to a subtract view that will take that polayer off of the team
 
 https://www.youtube.com/watch?v=VL5ZNCjXEbw
+
+
+Pretty good, just figured out how to show all the players, now search functionality should be pretty simple
