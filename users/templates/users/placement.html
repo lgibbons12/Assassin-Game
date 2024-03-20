@@ -7,33 +7,227 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Placement</title>
     <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
+    <style>
+        /* Style for the div containing the player list */
+#players-container {
+    padding: 20px;
+    margin-top: 20px;
+    background-color: #1f1f1f;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* Style for each player item */
+.player-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #333; /* Adjust background color if needed */
+    border: 2px solid #FF4545; /* Red border */
+}
+
+/* Style for the player name */
+.player-item p {
+    color: white;
+    margin: 0;
+}
+
+/* Style for the add button */
+.player-item button {
+    background-color: #FF4545; /* Red button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for the add button */
+.player-item button:hover {
+    background-color: darkred;
+}
+
+/* Navigation buttons style */
+#navigation {
+    margin-top: 20px;
+}
+
+#prev-btn,
+#next-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#prev-btn:hover,
+#next-btn:hover {
+    background-color: darkred;
+}
+
+/* Style for the "I'm Done" link */
+#done-link {
+    display: block;
+    margin-top: 20px;
+    color: red;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+#done-link:hover {
+    color: darkred;
+}
+
+/* Style for the container of team list and search form */
+.team-container {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #1f1f1f;
+    border-radius: 10px;
+    
+}
+
+/* Style for the heading of team list */
+.team-heading {
+    color: #f59415; /* Red color for heading */
+    margin-bottom: 10px;
+}
+
+/* Style for the team list */
+.team-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Style for each team item */
+.team-item {
+    margin-bottom: 10px;
+}
+
+/* Style for the team name */
+.team-name {
+    color: white;
+    margin: 0;
+}
+
+/* Style for the search form */
+.search-form {
+    margin-top: 20px;
+    
+    background-color: #1f1f1f;
+    
+    
+    
+    margin-bottom: 20px; /* Add margin for separation between players */
+    
+}
+
+/* Style for the search input */
+.search-input {
+    flex-grow: 1; /* Take up remaining space */
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    margin-right: 10px; /* Add some space between input and button */
+    background-color: darkgray;
+    color: white;
+}
+
+/* Style for the search button */
+.search-button {
+    background-color: #FF4545; /* Red button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for the search button */
+.search-button:hover {
+    background-color: darkred;
+}
+
+/* Style for the "Clear" link */
+.clear-link {
+    color: white;
+    text-decoration: none;
+    margin-left: 10px; /* Add some space between button and link */
+    transition: color 0.3s ease;
+}
+
+/* Hover effect for the "Clear" link */
+.clear-link:hover {
+    color: darkred;
+}
+/* Style for the container of each player and their clear link */
+.player-container {
+    display: flex;
+    align-items: center; /* Align items vertically */
+    border: 2px solid #FF4545; /* Red border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 10px; /* Add padding for better spacing */
+    margin-bottom: 10px; /* Add margin for separation between players */
+}
+
+/* Style for the clear link */
+.clear-link {
+    margin-left: 10px; /* Add some space between player name and clear link */
+}
+
+/* Adjust other styles as needed */
+.search-heading {
+    margin-bottom: 10px; /* Add some space below the heading */
+}
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="content">
             {% if is_placed %}
-                <h2>Your Group is: {{ group.group_name }}</h2>
-                <p>Current Team: </p>
+            <h2 class="team-name">Your Group is: {{ group.group_name }}</h2>
+            <div class="team-container">
+                <p class="team-heading">Current Members: </p>
                 {% for player in group.players.all %}
-                    <p>{{ player.user.first_name }}</p>
-                    <p><a href="{% url 'users:placement' %}?player_cleared={{ player.pk }}">Clear</a></p>
+                <div class="player-container">
+                    <p class="team-item">{{ player.user.first_name }} {{ player.user.last_name }}</p>
+                    <p class="team-item clear-link"><a href="{% url 'users:placement' %}?player_cleared={{ player.pk }}">Remove</a></p>
+                </div>
                 {% endfor %}
-                <p>Please add until you have your team!</p>
-                <h2><a href="{% url 'users:home' %}">I'm Done!</a></h2>
+                
+                <form action="{% url 'users:home' %}">
+                    {% csrf_token %}
+                    <button class="search-button"type="submit" name="button">Done</button>
+                </form>
+            </div>
            
 
-            <div class="container text-white">
+            <div class="search-form">
+                <div class="search-heading">
+                    <h2>Search for Team Members:</h2>
+                </div>
+                
                 <form action="{% url 'users:placement' %}" method="get">
                     {% csrf_token %}
-                    <input type="text" name="q" placeholder="Name">
-                    <button type="submit" name="button">Search</button>
+                    <input class="search-input" type="text" name="q" placeholder="Name">
+                    <button class="search-button"type="submit" name="button">Search</button>
                 </form>
                 {% if request.GET.q %}
-    <h2><a href="{% url 'users:placement' %}?q=">Clear</a></h2>
+    <p class="clear-link"><a href="{% url 'users:placement' %}?q=">Clear</a></p>
                 {% endif %}
             </div>
             <div id="players-container" style="padding: 20px;">
-                <h1>Players to pick from</h1>
+                <p>Free Agents</p>
                 <div id="player-list">
                     {% for player in players %}
                     <div class="player-item">
@@ -106,12 +300,17 @@
                 });
             </script>
              {% else %}
-             <h2>Want to Create Your Team?</h2>
+             <div class="search-form">
+                <div class="search-heading">
+                    <h2>Want to Create Your Team?</h2>
+                </div>
+            
              <form action="{% url 'users:placement' %}" method="get">
                  {% csrf_token %}
-                 <input type="text" name="team_name" placeholder="Team Name">
-                 <button type="submit" name="button">Submit</button>
+                 <input class="search-input"type="text" name="team_name" placeholder="Team Name">
+                 <button class="search-button"type="submit" name="button">Submit</button>
              </form>
+            </div>
              {% endif %}
             
         </div>
