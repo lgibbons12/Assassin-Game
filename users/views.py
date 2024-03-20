@@ -9,6 +9,8 @@ from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 
 from django.views.generic import ListView
+from django.db.models import Q
+
 
 # Create your views here.
 def home(request):
@@ -213,11 +215,11 @@ def placement(request):
     #if there is a search
     search = request.GET.get('q')
     if search is not None:
-        all_players = Player.objects.filter(user__first_name__icontains=search)
+        all_players = Player.objects.filter(Q(user__first_name__icontains=search) | Q(user__last_name__icontains=search)).order_by('user__last_name')
 
     players_not_on_team = [player for player in all_players if GameManager.player_on_team(player) is None]
     
-    context = {'is_placed': is_placed, 'group': c_group, 'ggame': GameManager.is_placing_groups(), 'players': players_not_on_team}
+    context = {'is_placed': is_placed, 'group': c_group, 'ggame': GameManager.is_placing_groups(), 'players': players_not_on_team, 'current_player': current}
     return render(request, "users/placement.html", context)
 
 

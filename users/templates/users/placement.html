@@ -116,9 +116,9 @@
 /* Style for the team name */
 .team-name {
     color: white;
-    margin: 0;
+    margin: 5% auto; /* 50% from the top and bottom, auto for left and right */
+    text-align: center; /* Align text to the center */
 }
-
 /* Style for the search form */
 .search-form {
     margin-top: 20px;
@@ -189,45 +189,58 @@
 .search-heading {
     margin-bottom: 10px; /* Add some space below the heading */
 }
+.search-form form {
+    display: flex;
+    align-items: center;
+}
+
+.search-button {
+    margin-left: 10px;
+}
+
     </style>
 </head>
 <body>
     <div class="container">
         <div class="content">
             {% if is_placed %}
-            <h2 class="team-name">Your Group is: {{ group.group_name }}</h2>
+            <h2 class="team-name">{{ group.group_name }}</h2>
             <div class="team-container">
-                <p class="team-heading">Current Members: </p>
                 {% for player in group.players.all %}
                 <div class="player-container">
+                    {% if player.pk != current_player.pk %}
                     <p class="team-item">{{ player.user.first_name }} {{ player.user.last_name }}</p>
                     <p class="team-item clear-link"><a href="{% url 'users:placement' %}?player_cleared={{ player.pk }}">Remove</a></p>
+                    {% else %}
+                    <p class="team-item">{{ player.user.first_name }} {{ player.user.last_name }} (You)</p>
+                    {% endif %}
                 </div>
                 {% endfor %}
                 
                 <form action="{% url 'users:home' %}">
                     {% csrf_token %}
-                    <button class="search-button"type="submit" name="button">Done</button>
+                    <button class="search-button"type="submit" name="button">Save</button>
                 </form>
             </div>
            
 
-            <div class="search-form">
+            <div class="search-form" style="padding: 20px;">
                 <div class="search-heading">
-                    <h2>Search for Team Members:</h2>
+                    <h2>Add Team Members:</h2>
                 </div>
                 
                 <form action="{% url 'users:placement' %}" method="get">
                     {% csrf_token %}
                     <input class="search-input" type="text" name="q" placeholder="Name">
                     <button class="search-button"type="submit" name="button">Search</button>
-                </form>
-                {% if request.GET.q %}
+                    {% if request.GET.q %}
     <p class="clear-link"><a href="{% url 'users:placement' %}?q=">Clear</a></p>
                 {% endif %}
+                </form>
+                
             </div>
-            <div id="players-container" style="padding: 20px;">
-                <p>Free Agents</p>
+            <div id="players-container" style="padding: 30px; margin: 15px 15px 15px 15px;">
+                
                 <div id="player-list">
                     {% for player in players %}
                     <div class="player-item">

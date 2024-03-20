@@ -62,3 +62,22 @@ Things to do now
 - add x's to take players off team
 - write function to check if a player is on a team, return that team, or None
 - only show players that are not currently on teams
+
+
+
+CSS To Do 3/20
+
+
+
+Automatic search update?
+
+
+
+Don’t need borders, have columns (add button inline)
+
+Frame that scrolls with overflow
+
+
+Only activate the save button if you make a change
+
+Play with fonts
