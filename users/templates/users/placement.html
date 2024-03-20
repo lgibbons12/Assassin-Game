@@ -13,14 +13,12 @@
         <div class="content">
             {% if is_placed %}
                 <h2>Your Group is: {{ group.group_name }}</h2>
-                <p>Teammates: </p>
+                <p>Current Team: </p>
                 {% for player in group.players.all %}
                     <p>{{ player.user.first_name }}</p>
                 {% endfor %}
-            {% else %}
-                <h2>Group Placement</h2>
-                <p>Please type in your teammate's names and click submit when you have your group!</p>
-            {% endif %}
+                <p>Please add until you have your team!</p>
+           
 
             <div class="container text-white">
                 <form action="{% url 'users:placement' %}" method="get">
@@ -28,6 +26,9 @@
                     <input type="text" name="q" placeholder="Name">
                     <button type="submit" name="button">Search</button>
                 </form>
+                {% if request.GET.q %}
+    <h2><a href="{% url 'users:placement' %}?q=">Clear</a></h2>
+                {% endif %}
             </div>
             <div id="players-container" style="padding: 20px;">
                 <h1>Players to pick from</h1>
@@ -35,7 +36,12 @@
                     {% for player in players %}
                     <div class="player-item">
                         <p>{{ player.user.first_name }} {{ player.user.last_name }}</p>
-                        <button class="add-btn">Add</button>
+                        <form action="{% url 'users:placement' %}" method="get">
+                            {% csrf_token %}
+                            <button type="submit" name="add">Add</button>
+                            <input type="hidden" name="player_pk" value="{{ player.pk }}">
+                        </form>
+                        
                     </div>
                     {% endfor %}
                 </div>
@@ -97,7 +103,14 @@
                     });
                 });
             </script>
-            
+             {% else %}
+             <h2>Want to Create Your Team?</h2>
+             <form action="{% url 'users:placement' %}" method="get">
+                 {% csrf_token %}
+                 <input type="text" name="team_name" placeholder="Team Name">
+                 <button type="submit" name="button">Submit</button>
+             </form>
+             {% endif %}
             
         </div>
     </div>

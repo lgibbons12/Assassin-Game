@@ -164,7 +164,18 @@ def assignment(request):
 
 #page for group placement
 def placement(request):
-    
+    new_team = request.GET.get("team_name")
+    if new_team is not None:
+        if len(AgentGroup.objects.filter(players=request.user.player)) == 0:
+            new_group = AgentGroup.objects.create(group_name = new_team)
+            new_group.players.add(request.user.player)
+            new_group.save()
+
+    player_added = request.GET.get("player_pk")
+    if player_added is not None:
+        current_group = AgentGroup.objects.filter(players=request.user.player)[0]
+        current_group.players.add(Player.objects.get(pk=player_added))
+        current_group.save()
     is_placed = True
     current = request.user.player
 
@@ -177,6 +188,11 @@ def placement(request):
         c_group = current_group[0]
     
     all_players = Player.objects.all()
+
+    #if there is a search
+    search = request.GET.get('q')
+    if search is not None:
+        all_players = Player.objects.filter(user__first_name__icontains=search)
     
     context = {'is_placed': is_placed, 'group': c_group, 'ggame': GameManager.is_placing_groups(), 'players': all_players}
     return render(request, "users/placement.html", context)

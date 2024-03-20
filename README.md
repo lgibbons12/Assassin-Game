@@ -55,3 +55,10 @@ https://www.youtube.com/watch?v=VL5ZNCjXEbw
 
 
 Pretty good, just figured out how to show all the players, now search functionality should be pretty simple
+
+Okay we have adding working. 
+
+Things to do now
+- add x's to take players off team
+- write function to check if a player is on a team, return that team, or None
+- only show players that are not currently on teams
