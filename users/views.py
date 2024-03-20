@@ -50,6 +50,20 @@ def assignment_direction(request):
 
     for checker in target_checkers:
         handle_checker(checker)
+
+    all_groups = AgentGroup.objects.all()
+
+    # Filter groups where all players are dead
+    
+    for group in all_groups:
+        # Count the number of dead players in the group
+        dead_players_count = group.players.filter(is_dead=True).count()
+        
+        # If all players in the group are dead, add the group to the result
+        if dead_players_count == group.players.count():
+            group.is_out = True
+            group.save()
+    
     
     #change this if we implement new games
     current_game = Game.objects.all()[0]
@@ -110,7 +124,7 @@ def group_assignment(request):
     context = {'state': state, 'team': current_group, 't_group': target_group, 'pwk': player_was_killed, 'pksd': player_killed_sd, 'ggame': GameManager.is_placing_groups()}
     
     try:
-        return render(request, "users/assignment.html", context)
+        return render(request, "users/group_assignment.html", context)
     except IndexError:
         return redirect(reverse('users:home'))
     except Exception as e:
@@ -176,6 +190,13 @@ def placement(request):
         current_group = AgentGroup.objects.filter(players=request.user.player)[0]
         current_group.players.add(Player.objects.get(pk=player_added))
         current_group.save()
+
+    player_deleted = request.GET.get("player_cleared")
+    if player_deleted is not None:
+        current_group = AgentGroup.objects.filter(players=request.user.player)[0]
+        current_group.players.remove(Player.objects.get(pk=player_deleted))
+        current_group.save()
+
     is_placed = True
     current = request.user.player
 
@@ -193,8 +214,10 @@ def placement(request):
     search = request.GET.get('q')
     if search is not None:
         all_players = Player.objects.filter(user__first_name__icontains=search)
+
+    players_not_on_team = [player for player in all_players if GameManager.player_on_team(player) is None]
     
-    context = {'is_placed': is_placed, 'group': c_group, 'ggame': GameManager.is_placing_groups(), 'players': all_players}
+    context = {'is_placed': is_placed, 'group': c_group, 'ggame': GameManager.is_placing_groups(), 'players': players_not_on_team}
     return render(request, "users/placement.html", context)
 
 

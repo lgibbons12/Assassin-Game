@@ -16,8 +16,10 @@
                 <p>Current Team: </p>
                 {% for player in group.players.all %}
                     <p>{{ player.user.first_name }}</p>
+                    <p><a href="{% url 'users:placement' %}?player_cleared={{ player.pk }}">Clear</a></p>
                 {% endfor %}
                 <p>Please add until you have your team!</p>
+                <h2><a href="{% url 'users:home' %}">I'm Done!</a></h2>
            
 
             <div class="container text-white">

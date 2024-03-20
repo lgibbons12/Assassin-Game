@@ -276,6 +276,20 @@ class GameManager:
     TARGETS_JSON_PATH = os.path.join(BASE_DIR, 'static', 'users', 'targets.json')
     
     @staticmethod
+    def player_on_team(player: Player):
+        group = AgentGroup.objects.filter(players=player)
+        length = len(group)
+
+        match length:
+            case 0:
+                return None
+            case 1:
+                return group
+            case _:
+                raise IndexError("Player on too many teams")
+        
+
+    @staticmethod
     def is_group_game():
         return Game.objects.all()[0].state == 1
     
