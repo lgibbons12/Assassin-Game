@@ -7,6 +7,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Your Assignment</title>
     <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
+    <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
     <style>
         /* Define a common style for the decision buttons */
     
@@ -54,6 +61,17 @@
             margin: 0 10px; /* Adjust the spacing between buttons if needed */
             flex-direction: column;
         }
+        body {
+    background-color: black;
+    color: white;
+    
+    font-family: 'Fira Code', monospace; /* Apply Fira Code font to the entire body */
+   
+    margin: 0;
+}
+.heading {
+    font-family: 'Black Ops One', cursive;
+}
     </style>
 </head>
 <body>
@@ -62,7 +80,7 @@
         {% if user.is_authenticated %}
             <div class="content">
                 {% if state == 0 %}
-                    <h2>Welcome, Agent {{ user.player.agent_name }}</h2>
+                    <h2 class="heading">Welcome, Agent {{ user.player.agent_name }}</h2>
                     <h5>Eliminate your target as quickly as possible. We are counting on you</h3>
                     <p>Your target is: {{ user.player.target_name }}</p>
                     

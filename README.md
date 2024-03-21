@@ -81,3 +81,15 @@ Frame that scrolls with overflow
 Only activate the save button if you make a change
 
 Play with fonts
+
+
+
+
+
+
+
+TO-DO Now:
+
+Be able to delete team or rename team
+
+Admin page!

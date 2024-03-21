@@ -7,20 +7,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Assassin</title>
     <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
+    <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
+    <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
 </head>
+<style>
+    body {
+    background-color: black;
+    color: white;
+    
+    font-family: 'Fira Code', monospace; /* Apply Fira Code font to the entire body */
+   
+    margin: 0;
+}
+.heading {
+    font-family: 'Black Ops One', cursive;
+}
+</style>
 <body>
     <div class="container">
         {% load socialaccount %}
-        <div class="header">
-            <h2>Google Login</h2>
-        </div>
-        <div class="login">
-            <a href="{% provider_login_url 'google' %}?next=/">Login with Google</a>
-        </div>
+        
 
         {% if user.is_authenticated %}
         <div class="user-info">
-            <p>You are signed in as {{user.first_name}}</p>
+            <h1 class="heading">Welcome to 007</h1>
+            <p class="heading">You are signed in as {{user.first_name}}</p>
             <div class="links">
                 <a href="assignmentdirection" class="assignment-button">See Your Assignment</a>
             </div>
@@ -51,6 +68,13 @@
             </ul>
 
             
+        </div>
+        {% else %}
+        <div class="header">
+            <h2 class="heading">Google Login</h2>
+        </div>
+        <div class="login">
+            <a href="{% provider_login_url 'google' %}?next=/">Login with Google</a>
         </div>
         {% endif %}
     </div>

@@ -7,7 +7,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Placement</title>
     <link rel="stylesheet" href="{% static 'users/assassin.css' %}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
     <style>
+        body {
+    font-family: 'Fira Code', monospace; /* Apply Fira Code font to the entire body */
+}
+
         /* Style for the div containing the player list */
 #players-container {
     padding: 20px;
@@ -118,6 +128,11 @@
     color: white;
     margin: 5% auto; /* 50% from the top and bottom, auto for left and right */
     text-align: center; /* Align text to the center */
+    font-family: 'Black Ops One', cursive;
+    letter-spacing: 2px; 
+    white-space: nowrap;
+    font-size: 300%;
+    
 }
 /* Style for the search form */
 .search-form {
@@ -198,6 +213,45 @@
     margin-left: 10px;
 }
 
+#player-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid columns */
+    grid-gap: 10px; /* Gap between grid items */
+    overflow-y: auto; /* Enable vertical scrolling */
+    max-height: 500px; /* Set max height to enable scrolling */
+}
+
+.player-item {
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+/* Customizing the scrollbar */
+#player-list::-webkit-scrollbar {
+    width: 10px; /* Width of the scrollbar */
+}
+
+#player-list::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Track color */
+}
+
+#player-list::-webkit-scrollbar-thumb {
+    background: #888; /* Thumb color */
+    border-radius: 5px; /* Roundness of the thumb */
+}
+
+#player-list::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Thumb color on hover */
+}
+
+/* Media query for mobile devices */
+@media screen and (max-width: 768px) {
+    #player-list {
+        grid-template-columns: repeat(2, 1fr); /* Two columns for smaller screens */
+    }
+}
     </style>
 </head>
 <body>
@@ -213,6 +267,7 @@
                     <p class="team-item clear-link"><a href="{% url 'users:placement' %}?player_cleared={{ player.pk }}">Remove</a></p>
                     {% else %}
                     <p class="team-item">{{ player.user.first_name }} {{ player.user.last_name }} (You)</p>
+                    <p class="team-item clear-link"><a href="{% url 'users:placement' %}?player_cleared={{ player.pk }}">Remove</a></p>
                     {% endif %}
                 </div>
                 {% endfor %}
@@ -254,64 +309,15 @@
                     </div>
                     {% endfor %}
                 </div>
+                <!--
                 <div id="navigation">
                     <button id="prev-btn">&lt; Prev</button>
                     <button id="next-btn">Next &gt;</button>
                 </div>
+                -->
             </div>
             
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    var players = document.querySelectorAll('.player-item');
-                    var prevBtn = document.getElementById('prev-btn');
-                    var nextBtn = document.getElementById('next-btn');
-                    var currentIndex = 0;
-                    var maxIndex = Math.max(Math.ceil(players.length / 5) - 1, 0);
             
-                    function showPlayers() {
-                        for (var i = 0; i < players.length; i++) {
-                            if (i >= currentIndex * 5 && i < (currentIndex + 1) * 5) {
-                                players[i].style.display = 'block';
-                            } else {
-                                players[i].style.display = 'none';
-                            }
-                        }
-            
-                        if (maxIndex <= 0) {
-                            prevBtn.style.display = 'none';
-                            nextBtn.style.display = 'none';
-                        } else {
-                            if (currentIndex === 0) {
-                                prevBtn.style.display = 'none';
-                            } else {
-                                prevBtn.style.display = 'block';
-                            }
-            
-                            if (currentIndex >= maxIndex) {
-                                nextBtn.style.display = 'none';
-                            } else {
-                                nextBtn.style.display = 'block';
-                            }
-                        }
-                    }
-            
-                    showPlayers();
-            
-                    prevBtn.addEventListener('click', function() {
-                        if (currentIndex > 0) {
-                            currentIndex--;
-                            showPlayers();
-                        }
-                    });
-            
-                    nextBtn.addEventListener('click', function() {
-                        if (currentIndex < maxIndex) {
-                            currentIndex++;
-                            showPlayers();
-                        }
-                    });
-                });
-            </script>
              {% else %}
              <div class="search-form">
                 <div class="search-heading">
@@ -320,13 +326,34 @@
             
              <form action="{% url 'users:placement' %}" method="get">
                  {% csrf_token %}
-                 <input class="search-input"type="text" name="team_name" placeholder="Team Name">
+                 <input id="search-input" class="search-input"type="text" name="team_name" placeholder="Team Name">
                  <button class="search-button"type="submit" name="button">Submit</button>
              </form>
             </div>
              {% endif %}
             
         </div>
+        <script>
+            // Function to perform search
+function performSearch() {
+    var query = document.getElementById('search-input').value.trim().toLowerCase();
+    var playerItems = document.querySelectorAll('.player-item');
+    
+    playerItems.forEach(function(playerItem) {
+        var playerName = playerItem.querySelector('p').textContent.trim().toLowerCase();
+        if (playerName.includes(query)) {
+            playerItem.style.display = 'block';
+        } else {
+            playerItem.style.display = 'none';
+        }
+    });
+}
+
+// Event listener for keyup event on search input
+document.getElementById('search-input').addEventListener('keyup', function() {
+    performSearch();
+});
+        </script>
     </div>
     <div class="navbar">
         <a href="{% url 'users:home' %}">Home</a>

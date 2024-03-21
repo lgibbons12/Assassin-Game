@@ -1,10 +1,14 @@
 body {
     background-color: black;
     color: white;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    
+    font-family: 'Fira Code', monospace; /* Apply Fira Code font to the entire body */
+   
     margin: 0;
 }
-
+.heading {
+    font-family: 'Black Ops One', cursive;
+}
 .container {
     max-width: 800px;
     margin: 0 auto;
