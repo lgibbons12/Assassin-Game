@@ -14,9 +14,19 @@ from django.db.models import Q
 
 # Create your views here.
 def home(request):
+    if request.method == 'POST':
+        print('hi')
+        print(request.POST)
+        if 'team_deleted' in request.POST:
+            print("team deleted")
+            team = GameManager.player_on_team(request.user.player)
+            if team is not None:
+                team.delete()
+
     #get the parameter value to know what waiting message to show after actions
     param_value = request.GET.get('param')
-
+    team_deleted = request.GET.get('team_deleted')
+    print(team_deleted)
     #winner to check if there is a winner
     winners = StatManager.get_winner()
     match winners[0]:

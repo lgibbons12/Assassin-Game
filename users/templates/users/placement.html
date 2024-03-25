@@ -173,6 +173,21 @@
     background-color: darkred;
 }
 
+.delete-button {
+    background-color: #FF4545; /* Red button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for the search button */
+.delete-button:hover {
+    background-color: darkred;
+}
+
 /* Style for the "Clear" link */
 .clear-link {
     color: white;
@@ -272,14 +287,44 @@
                 </div>
                 {% endfor %}
                 
-                <form action="{% url 'users:home' %}">
+                <form action="{% url 'users:home' %}" method="post">
                     {% csrf_token %}
                     <button class="search-button"type="submit" name="button">Save</button>
+                    <button class="delete-button" type="submit" name="team_deleted" data-param="deleted">Delete Team</button>
                 </form>
             </div>
-           
+            <script>
+                // Attach a click event listener to all buttons with the class 'delete-button'
+                document.querySelectorAll('.delete-button').forEach(function (button) {
+                    button.addEventListener('click', function (event) {
+                        // Extract the 'data-param' attribute value
+                        var param = this.getAttribute('data-param');
+                        
+                        var actionMessage;
+            
+                        // Determine the nature of the action for the confirmation message
+                        if (param === 'deleted') {
+                            actionMessage = 'Are you sure you want to delete your team?';
+                        } 
+            
+                        // Display confirmation dialog
+                        var confirmAction = confirm(actionMessage);
+            
+                        // Prevent form submission if cancel button is clicked
+                        if (!confirmAction) {
+                            event.preventDefault(); // This prevents the default form submission
+                        }
+                    });
+                });
+            </script>
 
             <div class="search-form" style="padding: 20px;">
+                {% if players|length == 0 %}
+                <div class="search-heading">
+                    <h2>No Available Players</h2>
+                </div>
+                </div>
+                {% else %}
                 <div class="search-heading">
                     <h2>Add Team Members:</h2>
                 </div>
@@ -316,7 +361,7 @@
                 </div>
                 -->
             </div>
-            
+            {% endif %}
             
              {% else %}
              <div class="search-form">
