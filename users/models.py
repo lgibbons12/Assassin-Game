@@ -23,6 +23,9 @@ class Player(models.Model):
     is_winner = models.BooleanField(default=False)
     in_waiting = models.BooleanField(default=False)
     have_eliminated_today = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}"
    
     def set_target(self, target):
         self.target_name = target.user.name
