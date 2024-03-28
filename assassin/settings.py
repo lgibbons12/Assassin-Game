@@ -102,7 +102,7 @@ JAZZMIN_SETTINGS = {
         {"model": "auth.User"},
 
         # App with dropdown menu to all its models pages (Permissions checked against models)
-        {"app": "Users"},
+        {"app": "users"},
     ],
 
     #############
@@ -132,7 +132,7 @@ JAZZMIN_SETTINGS = {
     "hide_models": [],
 
     # List of apps (and/or models) to base side menu ordering off of (does not need to contain all apps/models)
-    "order_with_respect_to": ["Users.Game", "Users", "Users.Player", "Users.Checker", "Users.AgentGroup", "Users.CustomUser"],
+    "order_with_respect_to": ["users.Game", "users", "users.Player", "users.Checker", "users.AgentGroup", "users.CustomUser"],
 
     #Custom links to append to app groups, keyed on app name
     # "custom_links": {
