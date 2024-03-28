@@ -26,8 +26,117 @@ def save_info(queryset):
             csv_writer.writerow(data_row)
 
         return response
+
 class PlayerAdmin(admin.ModelAdmin):
-    actions = ['assign_targets', 'save_info','discovered', 'killed_target', 'shuffle',
+    actions = ['assign_targets', 'discovered', 'killed_target', 'reset_elimination', 'add_players']
+    list_display = ['user', 'is_dead', 'kills', 'is_playing', 'in_waiting']
+    
+    search_fields = ['user__first_name', 'user__last_name']
+
+    #specific filtration
+    # Define custom list filters with custom names
+    class IsDeadFilter(admin.SimpleListFilter):
+        title = 'Is Eliminated?'  # Custom name for the filter
+        parameter_name = 'is_eliminated'
+
+        def lookups(self, request, model_admin):
+            return (
+                ('yes', 'Eliminated'),  # Custom names for filter options
+                ('no', 'Active'),
+            )
+
+        def queryset(self, request, queryset):
+            if self.value() == 'yes':
+                return queryset.filter(is_dead=True)
+            if self.value() == 'no':
+                return queryset.filter(is_dead=False)
+
+    class IsWaitingFilter(admin.SimpleListFilter):
+        title = 'Is Waiting?'  # Custom name for the filter
+        parameter_name = 'in_waiting'
+
+        def lookups(self, request, model_admin):
+            return (
+                ('yes', 'Waiting'),  # Custom names for filter options
+                ('no', 'Engaged'),
+            )
+
+        def queryset(self, request, queryset):
+            if self.value() == 'yes':
+                return queryset.filter(in_waiting=True)
+            if self.value() == 'no':
+                return queryset.filter(in_waiting=False)
+
+    class IsPlayingFilter(admin.SimpleListFilter):
+        title = 'Is Playing?'  # Custom name for the filter
+        parameter_name = 'is_playing'
+
+        def lookups(self, request, model_admin):
+            return (
+                ('yes', 'Playing'),  # Custom names for filter options
+                ('no', 'Not In The Game'),
+            )
+
+        def queryset(self, request, queryset):
+            if self.value() == 'yes':
+                return queryset.filter(is_playing=True)
+            if self.value() == 'no':
+                return queryset.filter(is_playing=False)
+
+    # Register custom list filters
+    list_filter = (IsDeadFilter, IsWaitingFilter, IsPlayingFilter)
+
+    def assign_targets(self, request, queryset):
+        GameManager.assign_targets()
+
+    def shuffle(self, request, queryset):
+        GameManager.assign_targets(new_game=False)
+
+    def discovered(self, request, queryset):
+        for player in queryset:
+            player.discovered()
+
+    def killed_target(self, request, queryset):
+        for player_instance in queryset:
+
+            gm = GameManager()
+            if gm.win_condition():
+                return False
+            player_instance.target.is_dead = True
+            player_instance.target.in_waiting = False
+            player_instance.target.save()
+
+            player_instance.killer.kills += 1
+            player_instance.killer.have_eliminated_today = True
+            player_instance.killer.in_waiting = False
+            player_instance.killer.save()
+            
+            gm.new_target(self.killer, self.target)
+
+    def reset_elimination(self, request, queryset):
+        for player in queryset:
+            player.is_dead = False
+            player.save()
+
+   
+
+    assign_targets.short_description = 'Assign Targets'
+    discovered.short_description = 'Mark as Dead'
+    killed_target.short_description = 'Kill Target'
+    reset_elimination.short_description = 'Revive Player'
+    
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
+    
+
+"""
+class PlayerAdmin(admin.ModelAdmin):
+    actions = ['assign_targets', 'discovered', 'killed_target', 'shuffle',
                'all_have_not_eliminated_today', 'add_players']
     list_display = ['pk', 'is_dead', 'kills', 'is_playing', 'in_waiting']
     list_filter = ['is_dead', 'in_waiting', 'have_eliminated_today', 'is_playing']
@@ -90,7 +199,7 @@ class PlayerAdmin(admin.ModelAdmin):
 
 
     user_name.short_description = 'User Name'
-
+"""
 class CheckerAdmin(admin.ModelAdmin):
     actions = ['checking']
     list_display = ['get_target_pk', 'get_killer_pk', 'confirmations', 'target_confirmed', 'killer_confirmed', 'action_performed']
