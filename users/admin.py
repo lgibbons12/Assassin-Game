@@ -32,6 +32,20 @@ class PlayerAdmin(admin.ModelAdmin):
     list_display = ['user', 'is_dead', 'kills', 'is_playing', 'in_waiting']
     
     search_fields = ['user__first_name', 'user__last_name']
+    
+
+    def get_action_choices(self, request):
+        # Get the default choices (including the blank choice represented by dashes)
+        choices = super().get_action_choices(request)
+
+        # Remove the first choice (the blank choice)
+        choices.pop(0)
+
+        # Add your custom choice (e.g., "Actions") at the beginning
+        custom_choice = ("", "Actions:")
+        choices.insert(0, custom_choice)
+
+        return choices
 
     #specific filtration
     # Define custom list filters with custom names
@@ -132,73 +146,99 @@ class PlayerAdmin(admin.ModelAdmin):
             del actions['delete_selected']
         return actions
 
-    
 
-"""
-class PlayerAdmin(admin.ModelAdmin):
-    actions = ['assign_targets', 'discovered', 'killed_target', 'shuffle',
-               'all_have_not_eliminated_today', 'add_players']
-    list_display = ['pk', 'is_dead', 'kills', 'is_playing', 'in_waiting']
-    list_filter = ['is_dead', 'in_waiting', 'have_eliminated_today', 'is_playing']
-    search_fields = ['target_name']
+class CheckerAdmin(admin.ModelAdmin):
+    actions = ['checking']
+    list_display = ['get_target_name', 'get_killer_name', 'confirmations', 'target_confirmed', 'killer_confirmed', 'action_performed']
+    list_filter = ['target_confirmed', 'killer_confirmed', 'action_performed']
 
-    def assign_targets(self, request, queryset):
-        gm = GameManager()
-        gm.assign_targets()
-    
-    def all_have_not_eliminated_today(self, request, queryset):
-        for obj in Player.objects.filter(is_playing=True, is_dead=False):
-            obj.have_eliminated_today = False
-            obj.save()
 
-    def add_players(self, request, queryset):
-        for i in range(20):
-            user2 = get_user_model().objects.create_user(
-            username=f'testuser{i}',
-            password='testpassword',
-            first_name=f'Jane{i}',
-            last_name='Doe'
+    class TargetConfirmedFilter(admin.SimpleListFilter):
+        title = 'Target Confirmed?'  # Custom name for the filter
+        parameter_name = 'target_confirmed'
+
+        def lookups(self, request, model_admin):
+            return (
+                ('yes', 'Target Confirmed'),  # Custom names for filter options
+                ('no', 'Target Waiting'),
             )
 
-    def shuffle(self, request, queryset):
-        #response = save_info(queryset)  # Call save_info and store the response
-        GameManager().assign_targets(new_game=False)
-        #return response
-        
-    def discovered(self, request, queryset):
-        for obj in queryset:
-            obj.discovered()
-
+        def queryset(self, request, queryset):
+            if self.value() == 'yes':
+                return queryset.filter(is_playing=True)
+            if self.value() == 'no':
+                return queryset.filter(is_playing=False)
     
-    def killed_target(self, request, queryset):
-        for player_instance in queryset:
+    class KillerConfirmedFilter(admin.SimpleListFilter):
+        title = 'Killer Confirmed?'  # Custom name for the filter
+        parameter_name = 'killer_confirmed'
 
-            gm = GameManager()
-            if gm.win_condition():
-                return False
-            player_instance.target.is_dead = True
-            player_instance.target.in_waiting = False
-            player_instance.target.save()
+        def lookups(self, request, model_admin):
+            return (
+                ('yes', 'Killer Confirmed'),  # Custom names for filter options
+                ('no', 'Killer Waiting'),
+            )
 
-            player_instance.killer.kills += 1
-            player_instance.killer.have_eliminated_today = True
-            player_instance.killer.in_waiting = False
-            player_instance.killer.save()
-            
-            gm.new_target(self.killer, self.target)
+        def queryset(self, request, queryset):
+            if self.value() == 'yes':
+                return queryset.filter(is_playing=True)
+            if self.value() == 'no':
+                return queryset.filter(is_playing=False)
+    
+    class ActionPerformedFilter(admin.SimpleListFilter):
+        title = 'Action Performed?'  # Custom name for the filter
+        parameter_name = 'action_performed'
 
+        def lookups(self, request, model_admin):
+            return (
+                ('yes', 'Action Performed'),  # Custom names for filter options
+                ('no', 'Waiting for Action'),
+            )
 
-           
+        def queryset(self, request, queryset):
+            if self.value() == 'yes':
+                return queryset.filter(is_playing=True)
+            if self.value() == 'no':
+                return queryset.filter(is_playing=False)
 
-    def user_name(self, obj):
-        return obj.user.name
+    # Register custom list filters
+    list_filter = (TargetConfirmedFilter, KillerConfirmedFilter, ActionPerformedFilter)
 
-    def save_info(self, request, queryset):
-        response = save_info(queryset)
-        return response
+    def get_action_choices(self, request):
+        # Get the default choices (including the blank choice represented by dashes)
+        choices = super().get_action_choices(request)
 
+        # Remove the first choice (the blank choice)
+        choices.pop(0)
 
-    user_name.short_description = 'User Name'
+        # Add your custom choice (e.g., "Actions") at the beginning
+        custom_choice = ("", "Actions:")
+        choices.insert(0, custom_choice)
+
+        return choices
+    
+    def get_target_name(self, obj):
+        return f"{obj.target.user.first_name} {obj.target.user.last_name}" if obj.target else None
+    get_target_name.short_description = 'Target Name'
+
+    def get_killer_name(self, obj):
+        return f"{obj.killer.user.first_name} {obj.killer.user.last_name}" if obj.killer else None
+    get_killer_name.short_description = 'Killer Name'
+
+    def target_user(self, obj):
+        return obj.target.user.name if obj.target else None
+    target_user.short_description = 'Target User'
+
+    def killer_user(self, obj):
+        return obj.killer.user.name if obj.killer else None
+    killer_user.short_description = 'Killer User'
+
+    def checking(self, request, queryset):
+        for obj in queryset:
+            obj.checking()
+
+    checking.short_description = 'Check and Perform Actions'
+
 """
 class CheckerAdmin(admin.ModelAdmin):
     actions = ['checking']
@@ -232,7 +272,7 @@ class CheckerAdmin(admin.ModelAdmin):
             obj.checking()
 
 
-
+"""
 
 class AgentGroupAdmin(admin.ModelAdmin):
     actions = ['assignGroupTargets', 'replace_groups']
