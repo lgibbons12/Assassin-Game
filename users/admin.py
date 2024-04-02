@@ -5,6 +5,8 @@ from django.http import HttpResponse
 import csv
 import tempfile
 from django.contrib.auth import get_user_model
+from django.db.models import Q
+
 def save_info(queryset):
     # Define the response as a CSV file
         response = HttpResponse(content_type='text/csv')
@@ -42,7 +44,7 @@ class PlayerAdmin(admin.ModelAdmin):
         choices.pop(0)
 
         # Add your custom choice (e.g., "Actions") at the beginning
-        custom_choice = ("", "Actions:")
+        custom_choice = ("", "Actions (select at least 1 model to perform):")
         choices.insert(0, custom_choice)
 
         return choices
@@ -212,7 +214,7 @@ class CheckerAdmin(admin.ModelAdmin):
         choices.pop(0)
 
         # Add your custom choice (e.g., "Actions") at the beginning
-        custom_choice = ("", "Actions:")
+        custom_choice = ("", "Actions (select at least 1 model to perform):")
         choices.insert(0, custom_choice)
 
         return choices
@@ -239,38 +241,107 @@ class CheckerAdmin(admin.ModelAdmin):
 
     checking.short_description = 'Check and Perform Actions'
 
-"""
-class CheckerAdmin(admin.ModelAdmin):
-    actions = ['checking']
-    list_display = ['get_target_pk', 'get_killer_pk', 'confirmations', 'target_confirmed', 'killer_confirmed', 'action_performed']
+class AgentGroupAdmin(admin.ModelAdmin):
+    actions = ['assign_group_targets', 'replace_groups']
+    list_display = ['group_name', 'get_players', 'is_out', 'is_playing']
+    search_fields = ['group_name', 'players__user__first_name', 'players__user__last_name']  # Search by group name or player name
+    list_filter = ['is_out', 'is_playing']
 
-    def get_target_pk(self, obj):
-        return obj.target.pk if obj.target else None
-    get_target_pk.short_description = 'Target PK'
+    def get_search_results(self, request, queryset, search_term):
+        """
+        Override default search functionality to prioritize group name.
+        If no groups match the search term, search for player names.
+        If no exact matches, search for individual words in player names.
+        """
+        # Use Q objects to perform OR operation for multiple search conditions
+        search_term = search_term.strip()
+        group_results = queryset.filter(group_name__icontains=search_term)
+        
+        if group_results.exists():
+            return group_results, False
+        else:
+            player_results = queryset.filter(
+                Q(players__user__first_name__icontains=search_term) |
+                Q(players__user__last_name__icontains=search_term)
+            ).distinct()
+            if player_results.exists():
+                return player_results, False
+            elif search_term:
+                # Search for individual words in player names only if the search term is not empty
+                words = search_term.split()
+                word_queries = [Q(players__user__first_name__icontains=word) | Q(players__user__last_name__icontains=word) for word in words]
+                combined_query = word_queries.pop()
+                for query in word_queries:
+                    combined_query |= query
+                individual_results = queryset.filter(combined_query).distinct()
+                return individual_results, False
+            else:
+                # If search term is empty, return the original queryset
+                return queryset, False
+            
+    class IsOutFilter(admin.SimpleListFilter):
+        title = 'Group Eliminated?'  # Custom name for the filter
+        parameter_name = 'is_out'
 
-    def get_killer_pk(self, obj):
-        return obj.killer.pk if obj.killer else None
-    get_killer_pk.short_description = 'Killer PK'
-    list_filter = ['target_confirmed', 'killer_confirmed', 'action_performed']
-    def target_user(self, obj):
-        return obj.target.user.name
+        def lookups(self, request, model_admin):
+            return (
+                ('yes', 'Group Eliminated'),  # Custom names for filter options
+                ('no', 'Group Active'),
+            )
 
-    def killer_user(self, obj):
-        return obj.killer.user.name if obj.killer else None
+        def queryset(self, request, queryset):
+            if self.value() == 'yes':
+                return queryset.filter(is_playing=True)
+            if self.value() == 'no':
+                return queryset.filter(is_playing=False)
     
-    def target_pk(self, obj):
-        return obj.target.pk
-    
-    def killer_pk(self, obj):
-        return obj.killer.pk
+    class IsPlayingFilter(admin.SimpleListFilter):
+        title = 'Group Playing?'  # Custom name for the filter
+        parameter_name = 'is_playing'
 
-    target_user.short_description = 'Target User'
-    killer_user.short_description = 'Killer User'
+        def lookups(self, request, model_admin):
+            return (
+                ('yes', 'Group Playing'),  # Custom names for filter options
+                ('no', 'Group Not Playing'),
+            )
 
-    def checking(self, request, queryset):
-        for obj in queryset:
-            obj.checking()
+        def queryset(self, request, queryset):
+            if self.value() == 'yes':
+                return queryset.filter(is_playing=True)
+            if self.value() == 'no':
+                return queryset.filter(is_playing=False)
 
+    def get_action_choices(self, request):
+        # Get the default choices (including the blank choice represented by dashes)
+        choices = super().get_action_choices(request)
+
+        # Remove the first choice (the blank choice)
+        choices.pop(0)
+
+        # Add your custom choice (e.g., "Actions") at the beginning
+        custom_choice = ("", "Actions (select at least 1 model to perform):")
+        choices.insert(0, custom_choice)
+
+        return choices
+
+
+    list_filter = (IsOutFilter, IsPlayingFilter)
+    def get_players(self, obj):
+        return ", ".join([f"{player.user.first_name} {player.user.last_name}" for player in obj.players.all()])
+    get_players.short_description = 'Players'
+
+    def assign_group_targets(self, request, queryset):
+        GameManager().assign_group_targets()
+    assign_group_targets.short_description = 'Assign Group Targets'
+
+    def replace_groups(self, request, queryset):
+        for obj in AgentGroup.objects.all():
+            obj.players.clear()
+            obj.save()
+        Game.objects.all().delete()
+        AgentGroup.objects.all().delete()
+        Game(state=1, placing_groups=True).save()
+    replace_groups.short_description = 'Replace Groups'
 
 """
 
@@ -295,7 +366,7 @@ class AgentGroupAdmin(admin.ModelAdmin):
         Game.objects.all().delete()
         Game(state=1, placing_groups=True).save()
     
-    
+    """
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active']
 
