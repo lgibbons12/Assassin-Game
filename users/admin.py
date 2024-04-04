@@ -31,10 +31,13 @@ def save_info(queryset):
 
 class PlayerAdmin(admin.ModelAdmin):
     actions = ['assign_targets', 'discovered', 'killed_target', 'reset_elimination', 'add_players']
-    list_display = ['user', 'is_dead', 'kills', 'is_playing', 'in_waiting']
+    list_display = ['get_full_name', 'is_dead', 'kills', 'is_playing', 'in_waiting']
     
     search_fields = ['user__first_name', 'user__last_name']
     
+    def get_full_name(self, obj):
+        return f"{obj.user.first_name} {obj.user.last_name}" if obj.user else None
+    get_full_name.short_description = 'Player Name'
 
     def get_action_choices(self, request):
         # Get the default choices (including the blank choice represented by dashes)
@@ -343,37 +346,94 @@ class AgentGroupAdmin(admin.ModelAdmin):
         Game(state=1, placing_groups=True).save()
     replace_groups.short_description = 'Replace Groups'
 
-"""
 
-class AgentGroupAdmin(admin.ModelAdmin):
-    actions = ['assignGroupTargets', 'replace_groups']
-    list_display = ['group_name', 'get_players', 'is_out', 'is_playing']
+class CustomUserAdmin(admin.ModelAdmin):
+    list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active']
 
-    def get_players(self, obj):
-        return ", ".join([f"{player.user.first_name} {player.user.last_name}" for player in obj.players.all()])
 
-    get_players.short_description = 'Players'
+class GameAdmin(admin.ModelAdmin):
+    actions = ['assign_targets', 'shuffle', 'switch_game', 'settle_checkers', 'replace_groups']
 
-    def assignGroupTargets(self, request, queryset):
-        GameManager().assign_group_targets()
+    list_display = ['name', 'get_state_display', 'placing_groups']
     
     def replace_groups(self, request, queryset):
         for obj in AgentGroup.objects.all():
             obj.players.clear()
             obj.save()
-        
-        
         Game.objects.all().delete()
+        AgentGroup.objects.all().delete()
         Game(state=1, placing_groups=True).save()
+    replace_groups.short_description = 'Replace Groups'
     
-    """
-class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active']
+    def assign_targets(self, request, queryset):
+        obj = queryset.first()
+        if obj.state == 0:
+            GameManager.assign_targets()
+        elif obj.state == 1:
+            GameManager.assign_group_targets()
+        
 
+    def shuffle(self, request, queryset):
+        obj = queryset.first()
+        if obj.state == 0:
+            GameManager.assign_targets(new_game=False)
+        elif obj.state == 1:
+            GameManager.assign_group_targets(new_game=False)
+
+    def switch_game(self, request, queryset):
+        obj = queryset.first()
+        obj.placing_groups = False
+        states = {0: 1, 1:0}
+        obj.state = states[obj.state]
+        if obj.state == 1:
+            obj.placing_groups = True
+        obj.save()
+    
+    def settle_checkers(self, request, queryset):
+        for obj in Checker.objects.filter(target_confirmed = True, killer_confirmed = True, confirmations = 2, action_performed = False):
+            obj.checking()
+        
+
+    
+
+    assign_targets.short_description = 'Assign Targets'
+    shuffle.short_description = 'Shuffle Targets'
+    switch_game.short_description = "Switch Game Mode"
+    settle_checkers.short_description = "Recheck All Eliminations"
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
+    def get_state_display(self, obj):
+        return 'Group Game' if obj.state == 1 else 'Single Player Game'
+    get_state_display.short_description = 'State'
+
+    def get_action_choices(self, request):
+        # Get the default choices (including the blank choice represented by dashes)
+        choices = super().get_action_choices(request)
+
+        # Remove the first choice (the blank choice)
+        choices.pop(0)
+
+        # Add your custom choice (e.g., "Actions") at the beginning
+        custom_choice = ("", "Actions (select Current Game):")
+        choices.insert(0, custom_choice)
+
+        return choices
+    
+    
+
+    
+
+
+    
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Player, PlayerAdmin)
 admin.site.register(Checker, CheckerAdmin)
 admin.site.register(AgentGroup, AgentGroupAdmin)
-admin.site.register(Game)
+admin.site.register(Game, GameAdmin)

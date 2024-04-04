@@ -229,6 +229,7 @@ class AgentGroup(models.Model):
 
 
 class Game(models.Model):
+    name = models.CharField(max_length = 35, default="Current Game")
     #state of 0 is normal gamemode, state of 1 is groups
     state = models.IntegerField(null=True, blank=True)
 
