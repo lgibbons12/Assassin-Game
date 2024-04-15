@@ -7,6 +7,9 @@ import tempfile
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
+#new
+from .models import Rule
+
 def save_info(queryset):
     # Define the response as a CSV file
         response = HttpResponse(content_type='text/csv')
@@ -427,7 +430,67 @@ class GameAdmin(admin.ModelAdmin):
     
 
     
+#added new
+class RuleAdmin(admin.ModelAdmin):
+    list_display = ['title', 'description']
+    search_fields = ['title']
+    actions = ['parse_rules']
 
+    def parse_rules(self, request, queryset):
+        for obj in Rule.objects.all():
+            obj.delete()
+        from bs4 import BeautifulSoup
+        html_content = """
+        <ul>
+        <li>Don’t talk about 007. Be secretive.</li>
+        <li>Don’t reveal your targets to others.</li>
+        <li>You may only eliminate a person if you are assigned their name, or if you collect their name through another elimination or if they have your name and you find out about it.</li>
+        <li>If you are eliminated, it will be updated in the portal.</li>
+        <li>You cannot under any circumstance reveal who eliminated you, via conversation, or drawing attention to yourself after being attacked. Those eliminated may not talk, or risk play in further games. Revealing who eliminated you will result in exclusion from future rounds.</li>
+        <li>Deans’ offices are designated safe zones.</li>
+        <li>No attacks off-campus.</li>
+        <li>If you witness an attack, you must tell that person immediately so they can input it. Witnesses only count if they actually see the elimination. They must see the physical knife for the witness to count.</li>
+        <li>No eliminations during tests, presentations, or quizzes.</li>
+        <li>No one may join the game after it has begun. Agents must wait until the following game.</li>
+        <li>Anyone late to Family Meeting is eliminated. Please be at FM’s at 8:10.</li>
+        <li>If your attack is witnessed, you are now out and your victim is revived.</li>
+        <li>If you are eliminated, you are done for that round. No whining.</li>
+        <li>If your target is eliminated via a witness, you will now try to eliminate their target.</li>
+        <li>You can attack your target from whenever you enter campus until you leave campus (exclusions above noted) excluding sports practices/games/workouts/clubs/CTC, etc.</li>
+        <li>Knives must be the original issue.</li>
+        <li>Witnesses must report what they saw within 5 minutes or it becomes void. Witnessing means you saw the knife.</li>
+        <li>Ties involving self-defense go to the attacker.</li>
+        <li>If you bear false witness you will be excluded from all future games.</li>
+        <li>During community meetings, from the time SC President says “Go Beyond!” until he says “Seniors first!” there are to be no attacks.</li>
+        <li>At least half of the knife must be visible when you attack a target.</li>
+        <li>Self-defense eliminations must be done in secret.</li>
+        <li>Eliminated agents can still act as witnesses.</li>
+        <li>At the discretion of the Gamemaster, agents may be shuffled periodically.</li>
+        <li>Agents who miss more than 1 full school day throughout the course of a game are eliminated.</li>
+    </ul>
+
+    <h2>Group Game Rules:</h2>
+    <ul>
+        <li>Keep group sizes consistent across the game.</li>
+        <li>Each player may only be on one team.</li>
+        <li>Eliminated players may still act as witnesses for their team.</li>
+        <li>Any player on a team can attack any player on the target team.</li>
+        <li>The team will receive a new target team once every member on the current target team is eliminated.</li>
+    </ul>
+        </div>
+    </div>
+
+        """
+        soup = BeautifulSoup(html_content, 'html.parser')
+        rules = []
+        list_items = soup.find_all('li')
+
+        for item in list_items:
+            description = item.get_text(strip=True)
+            rule = Rule(title="1", description=description)
+            rules.append(rule)
+        
+        Rule.objects.bulk_create(rules)
 
     
 
@@ -437,3 +500,4 @@ admin.site.register(Player, PlayerAdmin)
 admin.site.register(Checker, CheckerAdmin)
 admin.site.register(AgentGroup, AgentGroupAdmin)
 admin.site.register(Game, GameAdmin)
+admin.site.register(Rule, RuleAdmin)

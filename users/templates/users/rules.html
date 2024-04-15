@@ -35,8 +35,9 @@
         <div class="content">
             <h2 class="heading">The Rules of the Game</h2>
             <ul>
-                <li>Rule 1: ///</li>
-                <li>Rule 2: ///</li>
+                {% for rule in rules %}
+                    <li>{{ rule.description }}</li>
+                {% endfor %}
             </ul>
         </div>
     </div>

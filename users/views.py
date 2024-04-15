@@ -247,7 +247,8 @@ def submit_complaint(request):
     return render(request, "users/complaint.html", context)
 
 def rules(request):
-    context = {'ggame': GameManager.is_placing_groups()}
+    from .models import Rule
+    context = {'ggame': GameManager.is_placing_groups(), 'rules': Rule.objects.all()}
     return render(request, "users/rules.html", context)
 
 def handling(request):
