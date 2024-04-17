@@ -86,7 +86,7 @@ Let's go through the important information in here
 
 ### `apps.py`
 
-asdfg
+This file sets up the users app so that we can use its associated code in the project
 
 ### `urls.py`
 
@@ -133,17 +133,29 @@ This file sets up each model that is used to store information in the SQLite3 da
 
 The models consist of:
 
+- Custom User: This is an extension of each player's google profile that sets up a full name for them that can be used throughout the web app
+
+- Player: This is the model that houses information for every player. It contains functions to eliminate themselves and to handle when they have eliminated their target. The reciever at the bottom creates a player model for a user whenever they sign up.
+
+- Checker: The checker model handles checking for all eliminations. Each checker has a "target" and a "killer" and it saves whether both have confirmed the elimination. Once they have, the "checking" function handles all backend code to eliminate the player and set up a new target
+
+- AgentGroup: This model oversees the groups for the groups game. If includes a `ManyToManyField` which allows it to have a list of the Player models in the group. It can set a group target, but eliminations in group games are still handled by the Player models
+
+- Game: This model keeps track of whether the current game is a single-player or group game
+
+- Rule: This model keeps track of the rules to show on the rules page
+
 ### `game.py`
 
-asdf
+This file is not a django-specific file, rather it is a module I created to house `GameManager`, a catch-all class with many functions that can be used in the game. It contains checking functions such as `player_on_team`, `is_group_game`, `is_placing_groups`, and `win_condition` that files such as `views.py` can access to get current game states. The rest of `game.py` deals with targeting, with functions that assign players and groups new targets based on who their target was targeting, and functions that assign targets at the start of games using for loops.
 
 ### `stats.py`
 
-dfgh
+This file is similar in its modular nature to `game.py`, but its primary function is to return statistics that are displayed on the home page of the site.
 
 ### `templates/`
 
-Description of the `templates/` directory and its role in storing HTML templates for rendering views.
+The `templates/` directory houses all of the HTML files in use in the project. The HTML files present the code in a way browsers can understand. They format all the data handled on the backend with the `.py` files so that it can be displayed to the user. 
 
 ### `static/`
 
