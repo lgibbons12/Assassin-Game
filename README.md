@@ -22,7 +22,6 @@ hotspots of where to go when problems arise and how different files work in conj
    - [templates/](#templates)
    - [static/](#static)
 6. [Contributing](#contributing)
-7. [License](#license)
 
 ## Project Overview
 
@@ -157,9 +156,15 @@ This file is similar in its modular nature to `game.py`, but its primary functio
 
 The `templates/` directory houses all of the HTML files in use in the project. The HTML files present the code in a way browsers can understand. They format all the data handled on the backend with the `.py` files so that it can be displayed to the user. 
 
+There are three subdirectories that are important to mention
+
+- `admin` has templates that modulate the base admin templates that come out of the box with django
+- `socialaccount` has templates that change the base sign-in and sign-up templates that come out of the box with django's package `allauth`
+- `users` holds the html files that serve data from the python views listed above
+
 ### `static/`
 
-Explanation of the `static/` directory and its purpose in storing static files such as CSS, JavaScript, and images.
+The `static/` directory stores static files such as CSS and images to be served in the project.
 
 ## Contributing
 
